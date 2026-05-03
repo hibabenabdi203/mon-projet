@@ -7,7 +7,7 @@ let deviseActive = localStorage.getItem('twinova_devise') || 'DZD';
 // ── PLAN D'ACTION ─────────────────────────────────────
 async function chargerPlanAction(produitId = 2) {
   try {
-    const response = await apiBase(`/plan-action/${produitId}`);
+    const response = await fetch(`http://127.0.0.1:8000/plan-action/${produitId}`);
     const data = await response.json();
     const r = data.recommandations;
 
@@ -389,7 +389,7 @@ async function chargerPageRecettes() {
 // ── Charger les templates depuis le backend ──────────
 async function chargerTemplates() {
   try {
-    const response = await apiBase('/templates-recettes');
+    const response = await fetch('http://127.0.0.1:8000/templates-recettes');
     templatesData  = await response.json();
 
     const grid = document.getElementById('ts-grid');
@@ -565,7 +565,7 @@ async function sauvegarderRecette() {
   };
 
   try {
-    const response = await apiBase('/recettes', 'GET');
+    const response = await fetch('http://127.0.0.1:8000/recettes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -584,7 +584,7 @@ async function sauvegarderRecette() {
 
 async function chargerRecettesSauvegardees() {
   try {
-    const response = await apiBase('/recettes/2');
+    const response = await fetch('http://127.0.0.1:8000/recettes/2');
     recettesData   = await response.json();
 
     const container = document.getElementById('recettes-sauvegardees');
@@ -655,7 +655,7 @@ async function creerLot() {
   };
 
   try {
-    const response = await apiBase('/lots', 'GET');
+    const response = await fetch('http://127.0.0.1:8000/lots', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -778,7 +778,7 @@ async function simulerCapacite() {
   }
 
   try {
-    const response = await apiBase(
+    const response = await fetch(
       `http://127.0.0.1:8000/simulateur-capacite/${recetteId}?objectif_unites=${objectif}&trs_moyen=${trs}`
     );
     const result = await response.json();
@@ -996,7 +996,7 @@ function getCouleurKPI() {
 
 async function chargerKPIs3D(produitId = 2) {
   try {
-    const response = await apiBase(`/historique/${produitId}`);
+    const response = await fetch(`http://127.0.0.1:8000/historique/${produitId}`);
     const data = await response.json();
     if (!data.historique || data.historique.length === 0) return;
 
@@ -1251,7 +1251,7 @@ const chartDatasets = {
 
 async function chargerDonneesGraphiques(produitId = 2) {
   try {
-    const response = await apiBase(`/historique/${produitId}`);
+    const response = await fetch(`http://127.0.0.1:8000/historique/${produitId}`);
     const data = await response.json();
     const historique = data.historique.reverse(); // Du plus ancien au plus récent
 
@@ -1347,7 +1347,7 @@ async function initLossChart(produitId = 2) {
   let pannes = 42, micro = 18, setup = 15, qualite = 20;
 
   try {
-    const response = await apiBase(`/historique/${produitId}`);
+    const response = await fetch(`http://127.0.0.1:8000/historique/${produitId}`);
     const data = await response.json();
 
     if (data.historique && data.historique.length > 0) {
@@ -1412,12 +1412,12 @@ let BASE_REEL = null; // Sera rempli avec les vraies données
 
 async function chargerDonneesSimulateur(produitId = 2) {
   try {
-    const response = await apiBase(`/historique/${produitId}`);
+    const response = await fetch(`http://127.0.0.1:8000/historique/${produitId}`);
     const data = await response.json();
 
     if (data.historique && data.historique.length > 0) {
       const dernier = data.historique[0];
-      const prodResponse = await apiBase('/produits');
+      const prodResponse = await fetch(`http://127.0.0.1:8000/produits`);
       const produits = await prodResponse.json();
       const produit = produits.find(p => p.id === produitId) || produits[0];
 
@@ -1494,7 +1494,7 @@ async function calculateKPI(e) {
 
   try {
     // Envoyer les données au serveur Python
-    const response = await apiBase('/saisie', 'GET');
+    const response = await fetch('http://127.0.0.1:8000/saisie', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -1661,7 +1661,7 @@ function fullSim() {
 // ── MES PRODUITS ─────────────────────────────────────
 async function chargerProduits() {
   try {
-    const response = await apiBase('/produits');
+    const response = await fetch('http://127.0.0.1:8000/produits');
     const produits = await response.json();
 
     if (!produits || produits.length === 0) return;
