@@ -1,0 +1,504 @@
+<!-- =============================================================
+     TWINOVA — MODULE 4 : OPTIMISATION ÉNERGÉTIQUE & ÉCONOMIQUE
+     À coller dans index.html juste avant </main>
+     ============================================================= -->
+
+<!-- NAV à ajouter dans la sidebar :
+<a href="#" class="nav-item" data-page="energie">
+    <svg class="nav-icon" viewBox="0 0 20 20"><path d="M11 2L4 12h7l-2 6 9-10h-7l2-6z" fill="currentColor"/></svg>
+    Énergie & Économie
+</a>
+-->
+
+<div class="page" id="page-energie">
+
+  <!-- ── Topbar interne ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title" style="font-size:22px;font-weight:700">⚡ Optimisation Énergétique</div>
+      <div class="page-sub">Intensité énergétique · Loss Costing · Bilan Carbone · Audit mensuel</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-outline" onclick="energie.refresh()">🔄 Actualiser</button>
+      <button class="btn-accent" onclick="energie.genererAudit()">📊 Générer Audit</button>
+    </div>
+  </div>
+
+  <!-- ── KPIs Énergie ── -->
+  <div class="kpi-grid" id="energie-kpi-grid">
+
+    <!-- Score Efficacité -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">SCORE EFFICACITÉ</span>
+        <span class="kpi-status" id="energie-score-badge">—</span>
+      </div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="energie-score">—</div>
+        <div class="kpi-pct">/100</div>
+        <svg class="kpi-ring" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" stroke="#1a1f2e" stroke-width="6" fill="none"/>
+          <circle cx="40" cy="40" r="32" stroke="#0057b8" stroke-width="6" fill="none"
+            stroke-dasharray="201" stroke-dashoffset="100" stroke-linecap="round"
+            transform="rotate(-90 40 40)" id="ring-energie"/>
+        </svg>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target">Objectif : 85/100</div>
+        <div class="kpi-delta" id="energie-score-delta">—</div>
+      </div>
+      <div class="kpi-formula">EPI vs cibles définies</div>
+    </div>
+
+    <!-- Coût Énergie Mois -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">COÛT ÉNERGIE / MOIS</span>
+        <span class="kpi-status ok" id="energie-cout-badge">30 JOURS</span>
+      </div>
+      <div class="kpi-main" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div class="kpi-number" id="energie-cout" style="font-size:28px">—</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target" id="energie-economies">Économies potentielles : —</div>
+      </div>
+      <div class="kpi-formula">Électricité + Eau + Gaz</div>
+    </div>
+
+    <!-- EPI Électricité -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">EPI ÉLECTRICITÉ</span>
+        <span class="kpi-status" id="energie-epi-badge">—</span>
+      </div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="energie-epi" style="font-size:32px">—</div>
+        <div class="kpi-pct" style="font-size:14px">kWh/u</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target">Cible : 0.15 kWh/u</div>
+        <div class="kpi-delta" id="energie-epi-ecart">—</div>
+      </div>
+      <div class="kpi-formula">kWh consommés / unités produites</div>
+    </div>
+
+    <!-- Bilan Carbone -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">BILAN CARBONE</span>
+        <span class="kpi-status warning">CO₂</span>
+      </div>
+      <div class="kpi-main" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div class="kpi-number" id="energie-co2" style="font-size:28px">—</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">kg CO₂ / mois</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target" id="energie-co2-unite">— g CO₂ / unité</div>
+        <div class="kpi-delta" id="energie-co2-equiv" style="color:var(--green)">—</div>
+      </div>
+      <div class="kpi-formula">Conso × facteur émission</div>
+    </div>
+
+  </div>
+
+  <!-- ── Energy Pulse ── -->
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-top:16px">
+
+    <!-- Widget Energy Pulse -->
+    <div class="card" id="energy-pulse-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">⚡ Energy Pulse</div>
+          <div class="card-sub">Coût énergétique estimé du lot en cours</div>
+        </div>
+        <select id="pulse-type" class="btn-outline" style="font-size:12px;padding:5px 10px"
+                onchange="energie.updatePulse()">
+          <option value="electricite">⚡ Électricité</option>
+          <option value="eau">💧 Eau</option>
+          <option value="gaz">🔥 Gaz</option>
+        </select>
+      </div>
+      <div style="padding:10px 0">
+        <!-- Jauge circulaire -->
+        <div style="position:relative;width:160px;height:160px;margin:0 auto">
+          <svg viewBox="0 0 160 160" style="width:100%;height:100%">
+            <!-- Fond -->
+            <circle cx="80" cy="80" r="60" stroke="var(--bg-h)" stroke-width="12" fill="none"/>
+            <!-- Valeur -->
+            <circle cx="80" cy="80" r="60" id="pulse-ring"
+              stroke="var(--teal)" stroke-width="12" fill="none"
+              stroke-dasharray="377" stroke-dashoffset="300"
+              stroke-linecap="round" transform="rotate(-90 80 80)"
+              style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s"/>
+            <!-- Zones -->
+            <text x="80" y="72" text-anchor="middle" font-family="JetBrains Mono" font-size="22" font-weight="700" fill="var(--text)" id="pulse-val">—</text>
+            <text x="80" y="90" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="var(--text-m)" id="pulse-unite">DZD/h</text>
+            <text x="80" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--text-d)" id="pulse-label">estimé</text>
+          </svg>
+        </div>
+
+        <!-- Détails -->
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:var(--bg-e);border-radius:var(--r);padding:10px;text-align:center">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Période creuse</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--green)" id="pulse-creuse">— DZD</div>
+          </div>
+          <div style="background:var(--bg-e);border-radius:var(--r);padding:10px;text-align:center">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Période pointe</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--red)" id="pulse-pointe">— DZD</div>
+          </div>
+        </div>
+
+        <!-- Comparaison shifts -->
+        <div style="margin-top:12px;background:var(--bg-e);border-radius:var(--r);padding:12px;border:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text-m);letter-spacing:1px;margin-bottom:8px">COMPARAISON SHIFTS</div>
+          <div id="shifts-compare" style="font-size:12px;color:var(--text-m)">Chargement…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique Productivité vs Énergie -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📈 Productivité vs Énergie</div>
+          <div class="card-sub">Vérifier que la cadence n'explose pas la consommation</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="period-tab active" onclick="energie.setGraphPeriod('7j',this)">7j</button>
+          <button class="period-tab" onclick="energie.setGraphPeriod('30j',this)">30j</button>
+        </div>
+      </div>
+      <canvas id="energie-chart" height="220"></canvas>
+    </div>
+
+  </div>
+
+  <!-- ── Onglets ── -->
+  <div class="card" style="margin-top:16px;padding:0;overflow:hidden">
+
+    <div style="display:flex;background:var(--bg-e);border-bottom:1px solid var(--border)">
+      <button class="tab-btn active" onclick="energie.switchTab('saisie')" data-etab="saisie">📥 Saisie Énergie</button>
+      <button class="tab-btn" onclick="energie.switchTab('loss')" data-etab="loss">💸 Loss Costing</button>
+      <button class="tab-btn" onclick="energie.switchTab('audit')" data-etab="audit">📋 Audit Mensuel</button>
+      <button class="tab-btn" onclick="energie.switchTab('carbone')" data-etab="carbone">🌿 Bilan Carbone</button>
+      <button class="tab-btn" onclick="energie.switchTab('tarifs')" data-etab="tarifs">⚙️ Tarifs & Seuils</button>
+    </div>
+
+    <!-- TAB : SAISIE ÉNERGIE -->
+    <div id="etab-saisie" class="etab active-etab" style="padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">NOUVELLE SAISIE</div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Type d'énergie</label>
+              <select id="e-type" class="form-group input" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px" onchange="energie.onTypeChange()">
+                <option value="electricite">⚡ Électricité (kWh)</option>
+                <option value="eau">💧 Eau (m³)</option>
+                <option value="gaz">🔥 Gaz (m³)</option>
+                <option value="fioul">🛢 Fioul (L)</option>
+                <option value="vapeur">♨️ Vapeur (kg)</option>
+                <option value="air_comprime">💨 Air comprimé (Nm³)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Période tarifaire</label>
+              <select id="e-periode" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="pleine">Pleine (jour)</option>
+                <option value="creuse">Creuse (nuit)</option>
+                <option value="pointe">Pointe (pic)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="e-date" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Shift</label>
+              <select id="e-shift" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="matin">Matin (6h-14h)</option>
+                <option value="jour">Jour (8h-18h)</option>
+                <option value="soir">Soir (14h-22h)</option>
+                <option value="nuit">Nuit (22h-6h)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Consommation <span id="e-unite-label" style="color:var(--teal)">(kWh)</span></label>
+              <input type="number" id="e-consommation" placeholder="Ex: 450" step="0.1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="energie.previewCout()"/>
+            </div>
+            <div class="form-group">
+              <label>Unités produites</label>
+              <input type="number" id="e-production" placeholder="Ex: 3000" step="1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="energie.previewCout()"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Opérateur</label>
+            <input type="text" id="e-operateur" placeholder="Nom de l'opérateur"
+              style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+          </div>
+
+          <!-- Preview -->
+          <div id="e-preview" style="display:none;background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--r);padding:12px;margin:10px 0">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:1px;margin-bottom:6px">PRÉVISUALISATION</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)" id="prev-cout">—</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">COÛT DZD</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)" id="prev-epi">—</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">EPI kWh/u</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)" id="prev-co2">—</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">kg CO₂</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-accent" style="width:100%;margin-top:4px" onclick="energie.saisir()">
+            ⚡ Enregistrer la Consommation
+          </button>
+        </div>
+
+        <!-- Historique récent -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">DERNIÈRES SAISIES</div>
+          <table class="data-table" id="energie-historique-table">
+            <thead><tr>
+              <th>Date</th><th>Type</th><th>Conso</th><th>EPI</th><th>Coût</th><th>Alerte</th>
+            </tr></thead>
+            <tbody id="energie-historique-body">
+              <tr><td colspan="6" style="text-align:center;color:var(--text-m);padding:20px">Aucune saisie</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : LOSS COSTING -->
+    <div id="etab-loss" class="etab" style="display:none;padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:6px">COÛT RÉEL D'UN LOT RATÉ</div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--text-m);margin-bottom:16px;line-height:1.6">
+            La perte réelle dépasse toujours la simple marge perdue. TWINOVA décompose le vrai coût industriel.
+          </p>
+
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Quantité perdue (kg)</label>
+              <input type="number" id="lc-quantite" placeholder="Ex: 120" step="0.1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Coût matière (DZD/kg)</label>
+              <input type="number" id="lc-cout-matiere" placeholder="Ex: 85" step="1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Heures opérateur</label>
+              <input type="number" id="lc-heures" placeholder="Ex: 2" step="0.5"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Taux horaire (DZD/h)</label>
+              <input type="number" id="lc-taux" value="800" step="50"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Énergie gaspillée (kWh)</label>
+              <input type="number" id="lc-energie" placeholder="Ex: 45" step="0.5"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Coût traitement déchet (DZD)</label>
+              <input type="number" id="lc-traitement" placeholder="Ex: 500" step="100"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+          </div>
+          <button class="btn-accent" style="width:100%" onclick="energie.calculerLossCosting()">
+            💸 Calculer le Coût Réel
+          </button>
+        </div>
+
+        <!-- Résultat Loss Costing -->
+        <div id="loss-result" style="display:none">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:1.5px;margin-bottom:14px">DÉCOMPOSITION DU COÛT RÉEL</div>
+          <div id="loss-total" style="background:rgba(217,48,37,.06);border:1px solid rgba(217,48,37,.2);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:16px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">COÛT TOTAL RÉEL</div>
+            <div style="font-family:var(--mono);font-size:36px;font-weight:700;color:var(--red)" id="loss-total-val">—</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">DZD</div>
+          </div>
+          <canvas id="loss-chart" height="200"></canvas>
+          <div id="loss-interpretation" style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--text-m);line-height:1.6;padding:12px;background:var(--bg-e);border-radius:var(--r)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : AUDIT MENSUEL -->
+    <div id="etab-audit" class="etab" style="display:none;padding:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px">RAPPORT D'AUDIT MENSUEL</div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--text-m);margin-top:4px">Généré automatiquement à partir de vos saisies</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select id="audit-mois" style="padding:8px 12px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px">
+            <option value="1">Janvier</option><option value="2">Février</option>
+            <option value="3">Mars</option><option value="4">Avril</option>
+            <option value="5">Mai</option><option value="6">Juin</option>
+            <option value="7">Juillet</option><option value="8">Août</option>
+            <option value="9">Septembre</option><option value="10">Octobre</option>
+            <option value="11">Novembre</option><option value="12">Décembre</option>
+          </select>
+          <input type="number" id="audit-annee" value="2026" min="2020" max="2030"
+            style="padding:8px 12px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px;width:80px"/>
+          <button class="btn-accent" onclick="energie.genererAudit()">📊 Générer</button>
+        </div>
+      </div>
+      <div id="audit-result"></div>
+    </div>
+
+    <!-- TAB : BILAN CARBONE -->
+    <div id="etab-carbone" class="etab" style="display:none;padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:1.5px;margin-bottom:16px">🌿 EMPREINTE CARBONE ANNUELLE</div>
+          <div id="carbone-result">
+            <div style="background:rgba(26,138,74,.06);border:1px solid rgba(26,138,74,.2);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:16px">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">CO₂ TOTAL</div>
+              <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:var(--green)" id="co2-total-val">—</div>
+              <div style="font-family:var(--mono);font-size:13px;color:var(--text-m)">kg CO₂ / an</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="background:var(--bg-e);border-radius:var(--r);padding:14px;text-align:center">
+                <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text)" id="co2-arbres">—</div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">🌳 arbres à planter</div>
+              </div>
+              <div style="background:var(--bg-e);border-radius:var(--r);padding:14px;text-align:center">
+                <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text)" id="co2-km">—</div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">🚗 km équivalent</div>
+              </div>
+            </div>
+            <div id="co2-objectif" style="margin-top:12px;padding:12px;background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--r);font-family:var(--mono);font-size:11px;color:var(--teal);line-height:1.6"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:1.5px;margin-bottom:16px">RÉPARTITION PAR SOURCE</div>
+          <canvas id="carbone-chart" height="260"></canvas>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn-accent" onclick="energie.chargerCarbone()">🔄 Calculer le Bilan Carbone</button>
+      </div>
+    </div>
+
+    <!-- TAB : TARIFS & SEUILS -->
+    <div id="etab-tarifs" class="etab" style="display:none;padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <!-- Tarifs -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">CONFIGURER LES TARIFS</div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Type d'énergie</label>
+              <select id="t-type" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="electricite">⚡ Électricité</option>
+                <option value="eau">💧 Eau</option>
+                <option value="gaz">🔥 Gaz</option>
+                <option value="fioul">🛢 Fioul</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Période</label>
+              <select id="t-periode" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="pleine">Pleine</option>
+                <option value="creuse">Creuse</option>
+                <option value="pointe">Pointe</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Prix unitaire (DZD)</label>
+              <input type="number" id="t-prix" placeholder="Ex: 7.50" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Facteur CO₂ (kg/unité)</label>
+              <input type="number" id="t-co2" placeholder="0.512" step="0.001"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+          </div>
+          <button class="btn-accent" style="width:100%" onclick="energie.sauvegarderTarif()">💾 Enregistrer le Tarif</button>
+
+          <div style="margin-top:16px" id="tarifs-list"></div>
+        </div>
+
+        <!-- Seuils EPI -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--orange);letter-spacing:1.5px;margin-bottom:14px">DÉFINIR LES SEUILS EPI</div>
+          <div class="form-group">
+            <label>Type d'énergie</label>
+            <select id="s-type" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+              <option value="electricite">⚡ Électricité (kWh/unité)</option>
+              <option value="eau">💧 Eau (L/unité)</option>
+              <option value="gaz">🔥 Gaz (m³/unité)</option>
+            </select>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="form-group">
+              <label style="color:var(--green)">🎯 Cible</label>
+              <input type="number" id="s-cible" placeholder="0.15" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid rgba(26,138,74,.3);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label style="color:var(--yellow)">⚠️ Alerte</label>
+              <input type="number" id="s-alerte" placeholder="0.20" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid rgba(245,158,11,.3);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label style="color:var(--red)">🔴 Critique</label>
+              <input type="number" id="s-critique" placeholder="0.28" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid rgba(217,48,37,.3);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+          </div>
+          <button class="btn-accent" style="width:100%" onclick="energie.sauvegarderSeuil()">💾 Enregistrer le Seuil</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ── Onglets énergie ─────────────────────────────────── */
+.etab { display: none; }
+.active-etab { display: block; }
+.tab-btn {
+  padding: 13px 20px; border: none; background: transparent;
+  cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: var(--text-m); white-space: nowrap; position: relative; transition: all 0.18s;
+}
+.tab-btn:hover { color: var(--text); background: var(--bg-h); }
+.tab-btn.active { color: var(--teal); background: var(--bg-s); }
+.tab-btn.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--teal);
+}
+
+/* ── Alertes énergie ─────────────────────────────────── */
+.alerte-normal   { color: var(--green); font-family: var(--mono); font-size: 10px; }
+.alerte-attention{ color: var(--yellow); font-family: var(--mono); font-size: 10px; font-weight: 700; }
+.alerte-critique { color: var(--red); font-family: var(--mono); font-size: 10px; font-weight: 700; }
+</style>

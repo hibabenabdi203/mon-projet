@@ -1,0 +1,549 @@
+<!-- =============================================================
+     TWINOVA — MODULE 3 HACCP & SÉCURITÉ SANITAIRE
+     Section à insérer dans index.html juste avant </main> ou
+     à la suite des autres sections de page
+     ============================================================= -->
+
+<!-- ── NAV ITEM à ajouter dans la sidebar ── -->
+<!--
+<li class="nav-item" onclick="navigateTo('haccp')">
+    <span class="nav-icon">🛡️</span>
+    <span class="nav-text">HACCP & Sécurité</span>
+</li>
+-->
+
+<!-- ════════════════════════════════════════════════════════════
+     PAGE HACCP
+     ═══════════════════════════════════════════════════════════ -->
+<section id="page-haccp" class="page" style="display:none">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🛡️ HACCP & Sécurité Sanitaire</h1>
+      <p class="page-subtitle">Plans HACCP digitalisés — Contrôle terrain — Libération de lots</p>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn btn-secondary" onclick="haccp.refreshIndicateurs()">
+        🔄 Actualiser
+      </button>
+      <button class="btn btn-primary" onclick="haccp.openPlanModal()">
+        + Nouveau Plan HACCP
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Sanitaires ─────────────────────────────────────── -->
+  <div class="kpi-grid" id="haccp-kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-value" id="haccp-kpi-indice">—</div>
+      <div class="kpi-label">Indice de Conformité Sanitaire</div>
+      <div class="kpi-trend" id="haccp-kpi-indice-label"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🔴</div>
+      <div class="kpi-value" id="haccp-kpi-bloques">—</div>
+      <div class="kpi-label">Lots Bloqués</div>
+      <div class="kpi-trend" id="haccp-kpi-alertes-crit"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-value" id="haccp-kpi-liberes">—</div>
+      <div class="kpi-label">Lots Libérés</div>
+      <div class="kpi-trend" id="haccp-kpi-taux-lib"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-value" id="haccp-kpi-alertes">—</div>
+      <div class="kpi-label">Alertes Non Acquittées</div>
+      <div class="kpi-trend"></div>
+    </div>
+  </div>
+
+  <!-- Onglets ─────────────────────────────────────────────── -->
+  <div class="tabs-container" style="margin-top:24px">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="haccp.switchTab('controle')" data-tab="controle">
+        🌡️ Contrôle Sanitaire
+      </button>
+      <button class="tab-btn" onclick="haccp.switchTab('plans')" data-tab="plans">
+        📋 Plans HACCP
+      </button>
+      <button class="tab-btn" onclick="haccp.switchTab('alertes')" data-tab="alertes">
+        🚨 Alertes <span id="badge-alertes" class="badge-count" style="display:none"></span>
+      </button>
+      <button class="tab-btn" onclick="haccp.switchTab('formules')" data-tab="formules">
+        🔬 Formules Scientifiques
+      </button>
+    </div>
+
+    <!-- ── TAB : CONTRÔLE SANITAIRE ── -->
+    <div id="tab-controle" class="tab-content active-tab">
+      <div class="two-col-layout">
+
+        <!-- Formulaire saisie terrain -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Saisie Rapide — Contrôle Terrain</h3>
+          </div>
+          <div class="card-body">
+
+            <div class="form-group">
+              <label class="form-label">Lot de production</label>
+              <select id="haccp-lot-select" class="form-control"
+                      onchange="haccp.onLotChange(this.value)">
+                <option value="">— Sélectionner un lot —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Paramètre HACCP à contrôler</label>
+              <select id="haccp-seuil-select" class="form-control"
+                      onchange="haccp.onSeuilChange(this.value)">
+                <option value="">— Sélectionner d'abord un lot —</option>
+              </select>
+            </div>
+
+            <!-- Affichage zone de sécurité -->
+            <div id="haccp-zone-info" class="haccp-zone-card" style="display:none">
+              <div class="zone-label">Zone de sécurité</div>
+              <div class="zone-range" id="haccp-zone-range"></div>
+              <div class="zone-cible" id="haccp-zone-cible"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Valeur mesurée</label>
+              <div style="position:relative">
+                <input type="number" id="haccp-valeur" class="form-control"
+                       placeholder="Ex: 74.5" step="0.1"
+                       oninput="haccp.previewConformite()" />
+                <span id="haccp-unite-badge" class="input-badge"></span>
+              </div>
+            </div>
+
+            <!-- Preview conformité en temps réel -->
+            <div id="haccp-preview" class="conformite-preview" style="display:none"></div>
+
+            <div class="form-group">
+              <label class="form-label">Opérateur</label>
+              <input type="text" id="haccp-operateur" class="form-control"
+                     placeholder="Nom de l'opérateur" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Commentaire (optionnel)</label>
+              <textarea id="haccp-commentaire" class="form-control" rows="2"
+                        placeholder="Observations terrain..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%"
+                    onclick="haccp.soumettreControle()">
+              ✅ Enregistrer le Contrôle
+            </button>
+          </div>
+        </div>
+
+        <!-- Statut du lot sélectionné -->
+        <div>
+          <div class="card" id="haccp-statut-card" style="display:none">
+            <div class="card-header">
+              <h3 class="card-title">Statut Sanitaire du Lot</h3>
+            </div>
+            <div class="card-body">
+
+              <!-- Badge statut global -->
+              <div id="haccp-statut-badge" class="lot-statut-badge">—</div>
+
+              <!-- Jauge conformité -->
+              <div class="conformite-jauge-container">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                  <span class="label-sm">Indice de Conformité</span>
+                  <span id="haccp-indice-pct" class="label-sm bold">—</span>
+                </div>
+                <div class="jauge-track">
+                  <div id="haccp-jauge-bar" class="jauge-fill" style="width:0%"></div>
+                </div>
+              </div>
+
+              <!-- Métriques -->
+              <div class="mini-kpi-grid">
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val" id="hk-nb-controles">0</div>
+                  <div class="mini-kpi-lab">Contrôles</div>
+                </div>
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val green" id="hk-nb-conformes">0</div>
+                  <div class="mini-kpi-lab">Conformes</div>
+                </div>
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val red" id="hk-nb-crit">0</div>
+                  <div class="mini-kpi-lab">Alertes Crit.</div>
+                </div>
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val orange" id="hk-nb-min">0</div>
+                  <div class="mini-kpi-lab">Mineures</div>
+                </div>
+              </div>
+
+              <!-- Temps exposition risque -->
+              <div class="risque-bar" id="haccp-risque-bar">
+                <span>⏱️ Temps exposition risque :</span>
+                <span id="haccp-temps-risque" class="bold">0 min</span>
+              </div>
+
+              <!-- BOUTON LIBÉRATION — vert uniquement si tout est OK -->
+              <div id="haccp-liberation-zone" style="margin-top:16px">
+                <div id="haccp-block-msg" class="block-banner" style="display:none">
+                  🔴 LOT BLOQUÉ — NON CONFORME<br>
+                  <small>Résoudre toutes les alertes critiques avant libération</small>
+                </div>
+                <button id="haccp-btn-liberer"
+                        class="btn btn-liberation"
+                        style="display:none"
+                        onclick="haccp.libererLot()">
+                  ✅ Libérer le Lot
+                </button>
+                <div id="haccp-libere-msg" class="libere-banner" style="display:none">
+                  ✅ LOT LIBÉRÉ
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Historique contrôles lot -->
+          <div class="card" id="haccp-historique-card" style="display:none;margin-top:16px">
+            <div class="card-header">
+              <h3 class="card-title">Historique des Contrôles</h3>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="haccp-table">
+                <thead>
+                  <tr>
+                    <th>Paramètre</th>
+                    <th>Valeur</th>
+                    <th>Zone</th>
+                    <th>Statut</th>
+                    <th>Heure</th>
+                  </tr>
+                </thead>
+                <tbody id="haccp-controles-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-controle -->
+
+    <!-- ── TAB : PLANS HACCP ── -->
+    <div id="tab-plans" class="tab-content" style="display:none">
+      <div id="plans-haccp-list"></div>
+    </div>
+
+    <!-- ── TAB : ALERTES ── -->
+    <div id="tab-alertes" class="tab-content" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3>Alertes HACCP Actives</h3>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px">
+          <input type="checkbox" id="show-all-alertes"
+                 onchange="haccp.loadAlertes(this.checked)"> Afficher aussi les acquittées
+        </label>
+      </div>
+      <div id="alertes-list"></div>
+    </div>
+
+    <!-- ── TAB : FORMULES SCIENTIFIQUES ── -->
+    <div id="tab-formules" class="tab-content" style="display:none">
+      <div class="two-col-layout">
+
+        <!-- Valeur Pasteurisatrice -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">🌡️ Valeur Pasteurisatrice (VP)</h3>
+          </div>
+          <div class="card-body">
+            <p class="form-help">
+              Modèle de Bigelow — vérifie si un traitement thermique atteint
+              l'équivalent de 15 s à 72°C (standard HTST lait).
+            </p>
+            <div class="formula-box">
+              VP = t × 10<sup>(T − T<sub>réf</sub>) / z</sup>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Température de traitement (°C)</label>
+                <input type="number" id="vp-temp" class="form-control"
+                       value="74" step="0.5" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Durée effective (secondes)</label>
+                <input type="number" id="vp-duree" class="form-control"
+                       value="20" step="1" />
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Température référence (°C)</label>
+                <input type="number" id="vp-tref" class="form-control"
+                       value="72" step="0.5" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Valeur z (°C)</label>
+                <input type="number" id="vp-z" class="form-control"
+                       value="8" step="0.5" />
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%"
+                    onclick="haccp.calculerVP()">
+              Calculer VP
+            </button>
+            <div id="vp-result" style="margin-top:16px"></div>
+            <canvas id="vp-chart" height="160" style="margin-top:16px;display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Cinétique pH -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">🧪 Cinétique du pH — Fermentation</h3>
+          </div>
+          <div class="card-body">
+            <p class="form-help">
+              Modèle logistique de fermentation lactique — compare la courbe
+              réelle au profil théorique.
+            </p>
+            <div class="formula-box">
+              pH(t) = pH<sub>cible</sub> + Δ / (1 + e<sup>k·(t − t½)</sup>)
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Type de ferment</label>
+                <select id="ph-ferment" class="form-control">
+                  <option value="yaourt">Yaourt (L. bulgaricus)</option>
+                  <option value="fromage">Fromage (Lc. lactis)</option>
+                  <option value="kefir">Kéfir (mix)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Température étuve (°C)</label>
+                <input type="number" id="ph-temp" class="form-control"
+                       value="42" step="0.5" />
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">pH initial du lait</label>
+                <input type="number" id="ph-initial" class="form-control"
+                       value="6.5" step="0.1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">pH cible</label>
+                <input type="number" id="ph-cible" class="form-control"
+                       value="4.3" step="0.1" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Durée de fermentation (heures)</label>
+              <input type="number" id="ph-duree" class="form-control"
+                     value="4" step="0.5" />
+            </div>
+            <button class="btn btn-primary" style="width:100%"
+                    onclick="haccp.calculerPH()">
+              Simuler Cinétique pH
+            </button>
+            <div id="ph-result" style="margin-top:16px"></div>
+            <canvas id="ph-chart" height="160" style="margin-top:16px;display:none"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-formules -->
+
+  </div><!-- /tabs-container -->
+
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL — NOUVEAU PLAN HACCP
+     ═══════════════════════════════════════════════════════════ -->
+<div id="modal-plan-haccp" class="modal-overlay" style="display:none" onclick="haccp.closePlanModal(event)">
+  <div class="modal-box wide-modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>📋 Nouveau Plan HACCP</h2>
+      <button class="modal-close" onclick="haccp.closePlanModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Recette associée</label>
+          <select id="plan-recette-select" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nom du plan</label>
+          <input type="text" id="plan-nom" class="form-control"
+                 placeholder="Ex: HACCP Pasteurisation Lait A" />
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Version</label>
+          <input type="text" id="plan-version" class="form-control" value="1.0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsable</label>
+          <input type="text" id="plan-responsable" class="form-control"
+                 placeholder="Responsable Qualité" />
+        </div>
+      </div>
+
+      <div style="margin:20px 0 12px;display:flex;justify-content:space-between;align-items:center">
+        <h4>Points de Contrôle Critiques (CCP)</h4>
+        <button class="btn btn-secondary btn-sm" onclick="haccp.addSeuilRow()">
+          + Ajouter un CCP
+        </button>
+      </div>
+
+      <div id="seuils-container">
+        <!-- Ligne CCP template -->
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="haccp.closePlanModal()">Annuler</button>
+        <button class="btn btn-primary" onclick="haccp.sauvegarderPlan()">
+          💾 Créer le Plan HACCP
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     STYLES CSS MODULE 3 — à ajouter dans style.css
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+/* ── Onglets ─────────────────────────────────────────────── */
+.tabs-container { background:var(--bg-card,#fff); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.tabs-nav { display:flex; background:var(--bg-sidebar,#f8fafc); border-bottom:1px solid var(--border,#e2e8f0); gap:0; overflow-x:auto; }
+.tab-btn { padding:14px 20px; border:none; background:transparent; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-muted,#718096); white-space:nowrap; position:relative; transition:color .2s; }
+.tab-btn.active { color:var(--primary,#667eea); background:#fff; }
+.tab-btn.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--primary,#667eea); }
+.tab-content { padding:24px; display:none; }
+.tab-content.active-tab { display:block; }
+
+/* ── Layout ─────────────────────────────────────────────── */
+.two-col-layout { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:900px){ .two-col-layout{grid-template-columns:1fr;} }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* ── Badge alertes ───────────────────────────────────────── */
+.badge-count { display:inline-block; background:#e53e3e; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:4px; }
+
+/* ── Zone de sécurité ────────────────────────────────────── */
+.haccp-zone-card { background:linear-gradient(135deg,#ebf8ff,#e6fffa); border:1px solid #bee3f8; border-radius:10px; padding:12px 16px; margin-bottom:16px; }
+.zone-label { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:#2b6cb0; font-weight:600; }
+.zone-range { font-size:20px; font-weight:700; color:#1a365d; margin:4px 0 2px; }
+.zone-cible { font-size:13px; color:#2c7a7b; }
+
+/* ── Preview conformité ──────────────────────────────────── */
+.conformite-preview { padding:10px 14px; border-radius:8px; font-weight:600; font-size:13px; margin-bottom:12px; }
+.preview-ok  { background:#f0fff4; color:#276749; border:1px solid #9ae6b4; }
+.preview-nok { background:#fff5f5; color:#c53030; border:1px solid #feb2b2; }
+
+/* ── Badge statut lot ────────────────────────────────────── */
+.lot-statut-badge { text-align:center; padding:12px; border-radius:10px; font-weight:700; font-size:15px; margin-bottom:16px; }
+.statut-en_attente { background:#faf5ff; color:#6b46c1; border:1px solid #d6bcfa; }
+.statut-conforme   { background:#f0fff4; color:#276749; border:1px solid #9ae6b4; }
+.statut-bloque     { background:#fff5f5; color:#c53030; border:1px solid #feb2b2; animation:pulse-rouge 1.5s infinite; }
+.statut-libere     { background:#ebf8ff; color:#2b6cb0; border:1px solid #90cdf4; }
+@keyframes pulse-rouge { 0%,100%{box-shadow:0 0 0 0 rgba(197,48,48,.3)} 50%{box-shadow:0 0 0 8px rgba(197,48,48,0)} }
+
+/* ── Jauge conformité ────────────────────────────────────── */
+.conformite-jauge-container { margin-bottom:16px; }
+.jauge-track { height:10px; background:#e2e8f0; border-radius:5px; overflow:hidden; }
+.jauge-fill  { height:100%; border-radius:5px; transition:width .6s ease; background:linear-gradient(90deg,#48bb78,#38a169); }
+
+/* ── Mini KPIs ───────────────────────────────────────────── */
+.mini-kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+.mini-kpi { text-align:center; background:var(--bg,#f8fafc); border-radius:8px; padding:10px 6px; }
+.mini-kpi-val { font-size:20px; font-weight:700; }
+.mini-kpi-lab { font-size:11px; color:var(--text-muted,#718096); margin-top:2px; }
+.green { color:#38a169; }
+.red   { color:#e53e3e; }
+.orange{ color:#dd6b20; }
+
+/* ── Risque bar ──────────────────────────────────────────── */
+.risque-bar { display:flex; justify-content:space-between; background:#fffaf0; border:1px solid #fbd38d; border-radius:8px; padding:8px 12px; font-size:13px; color:#744210; margin-bottom:12px; }
+
+/* ── Blocage / Libération ────────────────────────────────── */
+.block-banner { background:#fff5f5; border:2px solid #e53e3e; border-radius:10px; padding:14px; text-align:center; color:#c53030; font-weight:700; font-size:14px; line-height:1.5; }
+.libere-banner { background:#f0fff4; border:2px solid #38a169; border-radius:10px; padding:14px; text-align:center; color:#276749; font-weight:700; font-size:15px; }
+.btn-liberation { width:100%; background:linear-gradient(135deg,#38a169,#276749); color:#fff; font-size:16px; font-weight:700; padding:14px; border-radius:10px; border:none; cursor:pointer; transition:transform .15s,box-shadow .15s; box-shadow:0 4px 12px rgba(56,161,105,.35); }
+.btn-liberation:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(56,161,105,.45); }
+
+/* ── Table contrôles ─────────────────────────────────────── */
+.haccp-table { width:100%; border-collapse:collapse; font-size:13px; }
+.haccp-table th { background:var(--bg,#f8fafc); padding:10px 14px; text-align:left; font-weight:600; color:var(--text-muted,#718096); font-size:11px; text-transform:uppercase; border-bottom:1px solid var(--border,#e2e8f0); }
+.haccp-table td { padding:10px 14px; border-bottom:1px solid var(--border,#e2e8f0); }
+.tag-conforme   { background:#f0fff4; color:#276749; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.tag-nc         { background:#fff5f5; color:#c53030; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.tag-mineure    { background:#fffaf0; color:#744210; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+
+/* ── Alertes ─────────────────────────────────────────────── */
+.alerte-card { border-radius:10px; padding:16px; margin-bottom:12px; border-left:4px solid; }
+.alerte-critique { background:#fff5f5; border-color:#e53e3e; }
+.alerte-mineure  { background:#fffaf0; border-color:#dd6b20; }
+.alerte-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.alerte-titre { font-weight:700; font-size:14px; }
+.alerte-critique .alerte-titre { color:#c53030; }
+.alerte-mineure  .alerte-titre { color:#744210; }
+.alerte-message  { font-size:13px; color:var(--text,#2d3748); margin-bottom:8px; }
+.alerte-action   { font-size:12px; font-style:italic; color:var(--text-muted,#718096); }
+.alerte-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+.alerte-time { font-size:11px; color:var(--text-muted,#718096); }
+
+/* ── Plans HACCP ─────────────────────────────────────────── */
+.plan-card { border-radius:12px; border:1px solid var(--border,#e2e8f0); margin-bottom:16px; overflow:hidden; }
+.plan-card-header { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; background:var(--bg,#f8fafc); border-bottom:1px solid var(--border,#e2e8f0); cursor:pointer; }
+.plan-card-title { font-weight:700; font-size:15px; color:var(--text,#2d3748); }
+.plan-card-meta  { font-size:12px; color:var(--text-muted,#718096); margin-top:3px; }
+.plan-badge { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; background:#ebf8ff; color:#2b6cb0; }
+.seuil-row { display:grid; grid-template-columns:2fr 1fr 1.5fr 1.5fr; gap:12px; align-items:start; padding:10px 0; border-bottom:1px solid var(--border,#e2e8f0); font-size:13px; }
+.seuil-row:last-child { border-bottom:none; }
+.seuil-type-badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+.type-temperature{ background:#ebf8ff; color:#2b6cb0; }
+.type-ph         { background:#f0fff4; color:#276749; }
+.type-metal      { background:#fff5f5; color:#c53030; }
+.type-humidite   { background:#e6fffa; color:#234e52; }
+.type-microbiologie{ background:#faf5ff; color:#6b46c1; }
+.type-visuel     { background:#fffff0; color:#744210; }
+
+/* ── Formules ────────────────────────────────────────────── */
+.formula-box { font-family:Georgia,serif; background:linear-gradient(135deg,#faf5ff,#ebf8ff); border:1px solid #d6bcfa; border-radius:8px; padding:12px 16px; text-align:center; font-size:16px; margin-bottom:16px; color:#44337a; }
+.form-help { font-size:13px; color:var(--text-muted,#718096); margin-bottom:14px; line-height:1.5; }
+.vp-result-card { border-radius:10px; padding:16px; }
+.vp-ok  { background:#f0fff4; border:1px solid #9ae6b4; }
+.vp-nok { background:#fff5f5; border:1px solid #feb2b2; }
+.vp-valeur { font-size:28px; font-weight:800; }
+.input-badge { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:12px; font-weight:600; color:var(--text-muted,#718096); background:var(--bg,#f8fafc); padding:2px 6px; border-radius:4px; }
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal-box { background:#fff; border-radius:16px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+.wide-modal { max-width:860px; }
+.modal-header { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border,#e2e8f0); }
+.modal-header h2 { font-size:18px; font-weight:700; margin:0; }
+.modal-close { background:none; border:none; font-size:18px; cursor:pointer; color:var(--text-muted,#718096); padding:4px 8px; border-radius:6px; }
+.modal-close:hover { background:var(--bg,#f8fafc); }
+.modal-body { padding:24px; }
+
+/* ── Ligne seuil dans modal ──────────────────────────────── */
+.seuil-form-row { background:var(--bg,#f8fafc); border-radius:10px; padding:14px; margin-bottom:10px; border:1px solid var(--border,#e2e8f0); position:relative; }
+.seuil-form-row .remove-btn { position:absolute; top:10px; right:10px; background:none; border:none; cursor:pointer; color:#e53e3e; font-size:16px; }
+.label-sm { font-size:12px; color:var(--text-muted,#718096); }
+.bold { font-weight:700; }
+.btn-sm { padding:6px 12px; font-size:12px; }
+</style>

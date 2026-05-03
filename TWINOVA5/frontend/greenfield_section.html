@@ -1,0 +1,321 @@
+<div class="page" id="page-greenfield">
+
+  <!-- ── Header ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title" style="font-size:22px;font-weight:700">🏗️ Simulation Greenfield</div>
+      <div class="page-sub">Laboratoire de Projet · Configurer · Simuler · Générer Business Plan</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button type="button" class="btn-outline" onclick="greenfield.nouveauProjet()">+ Nouveau Projet</button>
+      <button type="button" class="btn-accent" onclick="greenfield.simuler()">🚀 Lancer la Simulation</button>
+    </div>
+  </div>
+
+  <!-- ── KPIs résultats ── -->
+  <div class="kpi-grid" id="gf-kpi-grid" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">ROI ANNUEL</span><span class="kpi-status" id="gf-roi-badge">—</span></div>
+      <div class="kpi-main"><div class="kpi-number teal" id="gf-roi" style="font-size:32px">—</div><div class="kpi-pct">%</div></div>
+      <div class="kpi-bottom"><div class="kpi-target">Retour sur investissement</div></div>
+      <div class="kpi-formula">Bénéfice net / Investissement</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">PAYBACK</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-payback" style="font-size:32px">—</div><div class="kpi-pct" style="font-size:14px">mois</div></div>
+      <div class="kpi-bottom"><div class="kpi-target">Retour investissement</div></div>
+      <div class="kpi-formula">Invest / Bénéfice mensuel</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">CA MENSUEL</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-ca" style="font-size:24px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target">DZD / mois</div></div>
+      <div class="kpi-formula">Production × Prix vente</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">VAN 5 ANS</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-van" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="gf-van-label">Valeur actuelle nette</div></div>
+      <div class="kpi-formula">Taux actualisation 12%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">SURFACE USINE</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-surface" style="font-size:28px">—</div><div class="kpi-pct" style="font-size:14px">m²</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="gf-operateurs">— opérateurs</div></div>
+      <div class="kpi-formula">Machines + Circulation + Stock</div>
+    </div>
+  </div>
+
+  <!-- ── Corps principal ── -->
+  <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;margin-top:16px">
+
+    <!-- ── Panneau gauche : Paramètres ── -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Paramètres projet -->
+      <div class="card" style="padding:18px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">📋 PARAMÈTRES PROJET</div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Nom du projet</label>
+          <input type="text" id="gf-nom" placeholder="Ex: Laiterie El Baraka"
+            style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px"/>
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Secteur</label>
+          <select id="gf-secteur" onchange="greenfield.filtrerMachines()"
+            style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px">
+            <option value="Laiterie">🥛 Laiterie</option>
+            <option value="Boulangerie">🍞 Boulangerie</option>
+            <option value="Conserverie">🥫 Conserverie</option>
+            <option value="Fromagerie">🧀 Fromagerie</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Localisation</label>
+          <select id="gf-localisation"
+            style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px">
+            <option value="Alger">Alger (7.5 DZD/kWh)</option>
+            <option value="Oran">Oran (7.5 DZD/kWh)</option>
+            <option value="Constantine">Constantine (7.2 DZD/kWh)</option>
+            <option value="Annaba">Annaba (7.2 DZD/kWh)</option>
+            <option value="Setif">Sétif (7.0 DZD/kWh)</option>
+          </select>
+        </div>
+
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin:14px 0 10px">📊 VARIABLES DE MARCHÉ</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Prix vente (DZD/kg)</label>
+            <input type="number" id="gf-prix-vente" placeholder="250" value="250"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Coût MP (DZD/kg)</label>
+            <input type="number" id="gf-cout-mp" placeholder="80" value="80"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Main d'œuvre (DZD/m)</label>
+            <input type="number" id="gf-mdo" placeholder="500000" value="500000"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Loyer/m (DZD)</label>
+            <input type="number" id="gf-loyer" placeholder="150000" value="150000"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Production cible (kg/jour)</label>
+          <input type="number" id="gf-prod-cible" placeholder="1000" value="1000"
+            style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px;margin-top:4px"
+            oninput="greenfield.previewRapide()"/>
+        </div>
+
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin:14px 0 10px">🏦 FINANCEMENT</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Apport propre (%)</label>
+            <input type="number" id="gf-apport" value="30" min="0" max="100"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Taux intérêt (%)</label>
+            <input type="number" id="gf-taux" value="6" step="0.5"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"/>
+          </div>
+          <div style="grid-column:span 2">
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Durée crédit (ans)</label>
+            <select id="gf-duree"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px;margin-top:4px">
+              <option value="3">3 ans</option>
+              <option value="5" selected>5 ans</option>
+              <option value="7">7 ans</option>
+              <option value="10">10 ans</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Preview rapide marge -->
+        <div id="gf-preview-marge" style="display:none;margin-top:12px;padding:10px;background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--r)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:1px;margin-bottom:6px">MARGE UNITAIRE</div>
+          <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text)" id="gf-marge-val">—</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-m);margin-top:2px" id="gf-marge-pct">—</div>
+        </div>
+      </div>
+
+      <!-- Ligne sélectionnée résumé -->
+      <div class="card" style="padding:18px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">🏭 LIGNE CONFIGURÉE</div>
+        <div id="gf-ligne-resume" style="font-family:var(--mono);font-size:11px;color:var(--text-m)">
+          Glissez des machines dans le configurateur →
+        </div>
+        <div id="gf-invest-total" style="display:none;margin-top:12px;padding:10px;background:rgba(217,48,37,.06);border:1px solid rgba(217,48,37,.2);border-radius:var(--r)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--red)">INVESTISSEMENT MACHINES</div>
+          <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--red)" id="gf-invest-val">—</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">DZD (hors génie civil)</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Panneau droit : Configurateur + Résultats ── -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Onglets -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="display:flex;background:var(--bg-e);border-bottom:1px solid var(--border)">
+          <button type="button" class="tab-btn active" onclick="greenfield.switchTab('configurateur')" data-gftab="configurateur">🏗️ Configurateur</button>
+          <button type="button" class="tab-btn" onclick="greenfield.switchTab('resultats')" data-gftab="resultats">📊 Résultats</button>
+          <button type="button" class="tab-btn" onclick="greenfield.switchTab('plan3ans')" data-gftab="plan3ans">📈 Plan 3 ans</button>
+          <button type="button" class="tab-btn" onclick="greenfield.switchTab('dimensionnement')" data-gftab="dimensionnement">📐 Dimensionnement</button>
+        </div>
+
+        <!-- TAB : CONFIGURATEUR DRAG & DROP -->
+        <div id="gftab-configurateur" class="gftab" style="padding:20px;display:block">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+            <!-- Bibliothèque machines -->
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">
+                📦 BIBLIOTHÈQUE DE MACHINES
+                <select id="gf-filtre-cat" onchange="greenfield.filtrerMachines()"
+                  style="margin-left:10px;padding:4px 8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:11px">
+                  <option value="">Toutes catégories</option>
+                  <option value="reception">🏗️ Réception</option>
+                  <option value="transformation">⚙️ Transformation</option>
+                  <option value="conditionnement">📦 Conditionnement</option>
+                  <option value="stockage">❄️ Stockage</option>
+                  <option value="utilites">💨 Utilités</option>
+                </select>
+              </div>
+              <div id="gf-bibliotheque" style="display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto">
+                <div style="color:var(--text-m);font-family:var(--mono);font-size:11px;padding:20px;text-align:center">Chargement...</div>
+              </div>
+            </div>
+
+            <!-- Zone de drop : Ligne de production -->
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">
+                🏭 VOTRE LIGNE DE PRODUCTION
+                <button type="button" onclick="greenfield.viderLigne()"
+                  style="margin-left:10px;padding:3px 8px;background:transparent;border:1px solid var(--border-b);border-radius:var(--r);color:var(--text-m);font-size:10px;cursor:pointer">
+                  🗑 Vider
+                </button>
+              </div>
+              <div id="gf-drop-zone"
+                ondragover="event.preventDefault();this.style.background='var(--teal-dim)'"
+                ondragleave="this.style.background=''"
+                ondrop="greenfield.drop(event)"
+                style="min-height:360px;background:var(--bg-e);border:2px dashed var(--border-b);border-radius:var(--rl);padding:12px;display:flex;flex-direction:column;gap:8px;transition:background 0.2s">
+                <div id="gf-drop-hint" style="color:var(--text-d);font-family:var(--mono);font-size:11px;text-align:center;padding:40px 0">
+                  👈 Glissez des machines ici<br>pour construire votre ligne
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB : RÉSULTATS FINANCIERS -->
+        <div id="gftab-resultats" class="gftab" style="display:none;padding:20px">
+          <div id="gf-resultats-content">
+            <div style="text-align:center;padding:40px;color:var(--text-m);font-family:var(--mono);font-size:12px">
+              Configurez votre ligne et lancez une simulation 🚀
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB : PLAN 3 ANS -->
+        <div id="gftab-plan3ans" class="gftab" style="display:none;padding:20px">
+          <canvas id="gf-chart-3ans" height="300"></canvas>
+          <div id="gf-plan-table" style="margin-top:16px"></div>
+        </div>
+
+        <!-- TAB : DIMENSIONNEMENT -->
+        <div id="gftab-dimensionnement" class="gftab" style="display:none;padding:20px">
+          <div id="gf-dimensionnement-content">
+            <div style="text-align:center;padding:40px;color:var(--text-m);font-family:var(--mono);font-size:12px">
+              Lancez une simulation pour voir le dimensionnement
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bouton Business Plan -->
+      <div class="card" style="padding:18px;background:linear-gradient(135deg,var(--bg-e),var(--bg-s));border:1px solid var(--teal)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:700;font-size:15px">📄 Business Plan Complet</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-m);margin-top:4px">
+              Dossier technique et financier · Prêt pour les banques et investisseurs
+            </div>
+          </div>
+          <button type="button" class="btn-accent" onclick="greenfield.exporterBusinessPlan()" style="white-space:nowrap">
+            ⬇️ Générer le Business Plan
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.gftab { display: none; }
+.gftab-active { display: block; }
+
+/* Carte machine bibliothèque */
+.gf-machine-card {
+  display: flex; align-items: center; gap:10px;
+  background: var(--bg-e); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 10px 12px;
+  cursor: grab; transition: all 0.18s;
+  user-select: none;
+}
+.gf-machine-card:hover { border-color: var(--teal); transform: translateX(2px); box-shadow: 0 2px 10px var(--teal-glow); }
+.gf-machine-card:active { cursor: grabbing; opacity: 0.8; }
+.gf-machine-icon { font-size: 20px; flex-shrink: 0; }
+.gf-machine-info { flex: 1; min-width: 0; }
+.gf-machine-nom { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gf-machine-prix { font-family: var(--mono); font-size: 10px; color: var(--teal); }
+.gf-machine-add { background: none; border: 1px solid var(--border-b); border-radius: var(--r); padding: 3px 8px; cursor: pointer; font-size: 12px; color: var(--text-m); transition: all 0.18s; }
+.gf-machine-add:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+/* Carte machine dans la ligne */
+.gf-ligne-machine {
+  display: flex; align-items: center; gap:10px;
+  background: var(--bg-s); border: 1px solid var(--teal);
+  border-left: 3px solid var(--teal);
+  border-radius: var(--r); padding: 8px 12px;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+.gf-ligne-machine .gf-remove { background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; margin-left: auto; padding: 2px 6px; }
+.gf-ligne-machine .gf-remove:hover { background: rgba(217,48,37,.1); border-radius: 4px; }
+
+/* Catégorie badge */
+.cat-badge {
+  font-family: var(--mono); font-size: 9px; padding: 1px 6px;
+  border-radius: 4px; font-weight: 600;
+}
+.cat-reception     { background: rgba(0,87,184,.1); color: #0057b8; }
+.cat-transformation{ background: rgba(245,158,11,.1); color: var(--yellow); }
+.cat-conditionnement{ background: rgba(26,138,74,.1); color: var(--green); }
+.cat-stockage      { background: rgba(0,255,209,.1); color: var(--teal); }
+.cat-utilites      { background: rgba(107,70,193,.1); color: #6b46c1; }
+
+/* Flèche entre machines */
+.gf-arrow { text-align: center; color: var(--teal); font-size: 14px; margin: -4px 0; }
+</style>

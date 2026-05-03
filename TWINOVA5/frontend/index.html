@@ -1,0 +1,3533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TWINOVA — Digital Model Industriel</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+  
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════
+     PAGE CONNEXION / INSCRIPTION
+═══════════════════════════════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-box">
+
+    <div class="auth-logo">
+      <svg width="32" height="32" viewBox="0 0 28 28" fill="none">
+        <polygon points="14,2 26,8 26,20 14,26 2,20 2,8" stroke="#0057b8" stroke-width="1.5" fill="none"/>
+        <polygon points="14,7 21,11 21,18 14,22 7,18 7,11" stroke="#0057b8" stroke-width="1" fill="rgba(0,87,184,0.08)"/>
+        <circle cx="14" cy="14" r="2.5" fill="#0057b8"/>
+      </svg>
+      <span>TWIN<span style="color:#0057b8">OVA</span></span>
+    </div>
+
+    <!-- Onglets -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('connexion')">Connexion</button>
+      <button class="auth-tab" onclick="switchAuth('inscription')">Inscription</button>
+    </div>
+
+    <!-- Formulaire Connexion -->
+    <div id="form-connexion">
+      <div class="auth-subtitle">Connectez-vous à votre espace</div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="contact@entreprise.com"/>
+      </div>
+      <div class="auth-field">
+        <label>Mot de passe</label>
+        <input type="password" id="login-mdp" placeholder="••••••••"/>
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="auth-btn" onclick="seConnecter()">Se connecter →</button>
+    </div>
+
+    <!-- Formulaire Inscription -->
+    <div id="form-inscription" style="display:none">
+      <div class="auth-subtitle">Créez votre espace TWINOVA</div>
+      <div class="auth-field">
+        <label>Nom de l'entreprise</label>
+        <input type="text" id="reg-nom" placeholder="Ex: Fromagerie Martin"/>
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="contact@entreprise.com"/>
+      </div>
+      <div class="auth-field">
+        <label>Mot de passe</label>
+        <input type="password" id="reg-mdp" placeholder="Minimum 6 caractères"/>
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="auth-btn" onclick="sInscrire()">Créer mon compte →</button>
+    </div>
+
+  </div>
+</div>
+ <aside class="sidebar">
+
+    <!-- Logo -->
+    <div style="padding:12px 16px 8px;border-bottom:1px solid var(--border);text-align:center">
+        <img src="logo.png" alt="TWINOVA" style="height:90px;width:auto;object-fit:contain;display:block;margin:0 auto"/>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">PRINCIPAL</div>
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <svg class="nav-icon" viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="7" rx="1" fill="currentColor" opacity="0.9"/><rect x="11" y="2" width="7" height="7" rx="1" fill="currentColor" opacity="0.5"/><rect x="2" y="11" width="7" height="7" rx="1" fill="currentColor" opacity="0.5"/><rect x="11" y="11" width="7" height="7" rx="1" fill="currentColor" opacity="0.3"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="nav-item" data-page="saisie">
+        <svg class="nav-icon" viewBox="0 0 20 20"><path d="M4 4h12v2H4zM4 9h8v2H4zM4 14h10v2H4z" fill="currentColor"/></svg>
+        Saisie Production
+      </a>
+      <a href="#" class="nav-item" data-page="simulation">
+        <svg class="nav-icon" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Simulateur
+      </a>
+
+      <div class="nav-section-label" style="margin-top:16px">ANALYSE</div>
+      <a href="#" class="nav-item" data-page="decisions">
+        <svg class="nav-icon" viewBox="0 0 20 20"><path d="M3 10h14M10 3l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+        Plan d'Action
+      </a>
+      <a href="#" class="nav-item" data-page="historique">
+        <svg class="nav-icon" viewBox="0 0 20 20"><path d="M3 5h14M3 10h10M3 15h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Historique
+      </a>
+      <a href="#" class="nav-item" data-page="recettes">
+  <svg class="nav-icon" viewBox="0 0 20 20"><path d="M9 2H5a1 1 0 00-1 1v14a1 1 0 001 1h10a1 1 0 001-1V7l-4-5z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M9 2v5h5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7 11h6M7 14h4" stroke="currentColor" stroke-width="1.5"/></svg>
+  Recettes & Process
+</a>
+      <a href="#" class="nav-item" data-page="visualisation">
+  <svg class="nav-icon" viewBox="0 0 20 20"><path d="M10 2L2 7v6l8 5 8-5V7L10 2z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M2 7l8 5 8-5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 12v7" stroke="currentColor" stroke-width="1.5"/></svg>
+  Visualisation 3D
+</a>
+      <a href="#" class="nav-item" data-page="produits">
+        <svg class="nav-icon" viewBox="0 0 20 20"><rect x="3" y="7" width="14" height="10" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+        Mes Produits
+      </a>
+      <a href="#" class="nav-item" data-page="benchmark">
+    <svg class="nav-icon" viewBox="0 0 20 20"><path d="M2 11h3v7H2v-7zm6-4h3v11H8V7zm6-5h3v16h-3V2z" fill="currentColor"/></svg>
+    Benchmarking
+</a>
+
+<a href="#" class="nav-item" data-page="greenfield">
+  🏗️ Simulation Greenfield
+</a>
+      <a href="#" class="nav-item" data-page="intelligence">
+    <svg class="nav-icon" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9V9h2v4zm0-6H9V5h2v2z" fill="currentColor"/></svg>
+    Intelligence Prédictive
+</a>
+      <a href="#" class="nav-item" data-page="energie">
+    <svg class="nav-icon" viewBox="0 0 20 20"><path d="M11 2L4 12h7l-2 6 9-10h-7l2-6z" fill="currentColor"/></svg>
+    Énergie & Économie
+</a>
+
+      <a href="#" class="nav-item" data-page="haccp">
+    🛡️ HACCP & Sécurité
+</a>
+    </nav>
+
+    <!-- User -->
+    <div class="sidebar-user" onclick="navigate('compte')" style="cursor:pointer" title="Mon Compte">
+  <div class="user-avatar" id="sidebar-avatar">EA</div>
+  <div class="user-info">
+    <div class="user-name" id="sidebar-nom">Entreprise</div>
+    <div class="user-plan">Mon Compte →</div>
+  </div>
+  <div class="user-status"></div>
+</div>
+
+  </aside>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN
+  ═══════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-sub">Ligne A — Remplissage · Agroalimentaire · <span class="live-dot"></span> Temps réel</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbarDate"></div>
+        <select id="devise-selector" onchange="changerDevise(this.value)" title="Choisir la devise">
+  <option value="DZD">🇩🇿 DZD</option>
+  <option value="EUR">🇪🇺 EUR</option>
+  <option value="USD">🇺🇸 USD</option>
+  <option value="GBP">🇬🇧 GBP</option>
+  <option value="MAD">🇲🇦 MAD</option>
+  <option value="TND">🇹🇳 TND</option>
+  <option value="SAR">🇸🇦 SAR</option>
+  <option value="AED">🇦🇪 AED</option>
+  <option value="TRY">🇹🇷 TRY</option>
+  <option value="EGP">🇪🇬 EGP</option>
+</select>
+        <button type="button" class="btn-outline" onclick="navigate('saisie')">+ Saisir données</button>
+        <button type="button" class="btn-accent" onclick="navigate('simulation')">Simuler scénario</button>
+      </div>
+    </header>
+
+    <!-- ─────────────────────────────────────────
+         PAGE : DASHBOARD
+    ───────────────────────────────────────── -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- Score global -->
+      <div class="score-banner">
+        <div class="score-left">
+          <div class="score-label">SCORE DE SANTÉ GLOBAL</div>
+          <div class="score-value" id="scoreValue">72<span>/100</span></div>
+          <div class="score-bar-wrap">
+            <div class="score-bar-fill" id="scoreBar" style="width:72%"></div>
+          </div>
+        </div>
+        <div class="score-divider"></div>
+        <div class="score-alerts">
+          <div class="alert-item critical">
+            <span class="alert-dot"></span>
+            <span>Disponibilité critique — 70% · Action requise sous 48h</span>
+          </div>
+          <div class="alert-item warning">
+            <span class="alert-dot"></span>
+            <span>TRS en-dessous de l'objectif 85% — Écart : 23 points</span>
+          </div>
+          <div class="alert-item info">
+            <span class="alert-dot"></span>
+            <span>Gain potentiel mensuel identifié : 4 320 €</span>
+          </div>
+        </div>
+        <div class="score-divider"></div>
+        <div class="score-action">
+          <div class="score-action-label">PRIORITÉ N°1</div>
+          <div class="score-action-text">Maintenance préventive urgente</div>
+          <button class="btn-accent-sm" onclick="navigate('decisions')">Voir le plan d'action →</button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+
+        <div class="kpi-card" id="card-trs">
+          <div class="kpi-top">
+            <span class="kpi-name">TRS</span>
+            <span class="kpi-status critical">CRITIQUE</span>
+          </div>
+          <div class="kpi-main">
+            <div class="kpi-number" id="val-trs">62</div>
+            <div class="kpi-pct">%</div>
+            <div class="kpi-ring">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" stroke="#1a1f2e" stroke-width="6" fill="none"/>
+                <circle cx="40" cy="40" r="32" stroke="#ff4d6d" stroke-width="6" fill="none"
+                  stroke-dasharray="201" stroke-dashoffset="76" stroke-linecap="round"
+                  transform="rotate(-90 40 40)" class="ring-fill" id="ring-trs"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-bottom">
+            <div class="kpi-target">Objectif : 85%</div>
+            <div class="kpi-delta red">−23 pts</div>
+          </div>
+          <div class="kpi-formula">Dispo × Perf × Qual</div>
+        </div>
+
+        <div class="kpi-card" id="card-dispo">
+          <div class="kpi-top">
+            <span class="kpi-name">Disponibilité</span>
+            <span class="kpi-status warning">ATTENTION</span>
+          </div>
+          <div class="kpi-main">
+            <div class="kpi-number" id="val-dispo">70</div>
+            <div class="kpi-pct">%</div>
+            <div class="kpi-ring">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" stroke="#1a1f2e" stroke-width="6" fill="none"/>
+                <circle cx="40" cy="40" r="32" stroke="#ff9f43" stroke-width="6" fill="none"
+                  stroke-dasharray="201" stroke-dashoffset="60" stroke-linecap="round"
+                  transform="rotate(-90 40 40)" class="ring-fill" id="ring-dispo"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-bottom">
+            <div class="kpi-target">Pannes : 42 min/j</div>
+            <div class="kpi-delta red">−15 pts</div>
+          </div>
+          <div class="kpi-formula">(Tps planifié − Pannes) / Tps planifié</div>
+        </div>
+
+        <div class="kpi-card" id="card-perf">
+          <div class="kpi-top">
+            <span class="kpi-name">Performance</span>
+            <span class="kpi-status ok">CORRECT</span>
+          </div>
+          <div class="kpi-main">
+            <div class="kpi-number" id="val-perf">80</div>
+            <div class="kpi-pct">%</div>
+            <div class="kpi-ring">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" stroke="#1a1f2e" stroke-width="6" fill="none"/>
+                <circle cx="40" cy="40" r="32" stroke="#00FFD1" stroke-width="6" fill="none"
+                  stroke-dasharray="201" stroke-dashoffset="40" stroke-linecap="round"
+                  transform="rotate(-90 40 40)" class="ring-fill" id="ring-perf"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-bottom">
+            <div class="kpi-target">Micro-arrêts : 18 min/j</div>
+            <div class="kpi-delta yellow">−5 pts</div>
+          </div>
+          <div class="kpi-formula">Prod réelle / Prod théorique</div>
+        </div>
+
+        <div class="kpi-card" id="card-qual">
+          <div class="kpi-top">
+            <span class="kpi-name">Qualité</span>
+            <span class="kpi-status ok">CORRECT</span>
+          </div>
+          <div class="kpi-main">
+            <div class="kpi-number" id="val-qual">88</div>
+            <div class="kpi-pct">%</div>
+            <div class="kpi-ring">
+              <svg viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" stroke="#1a1f2e" stroke-width="6" fill="none"/>
+                <circle cx="40" cy="40" r="32" stroke="#00FFD1" stroke-width="6" fill="none"
+                  stroke-dasharray="201" stroke-dashoffset="24" stroke-linecap="round"
+                  transform="rotate(-90 40 40)" class="ring-fill" id="ring-qual"/>
+              </svg>
+            </div>
+          </div>
+          <div class="kpi-bottom">
+            <div class="kpi-target">Rebuts : 12 pcs/j</div>
+            <div class="kpi-delta yellow">−2 pts</div>
+          </div>
+          <div class="kpi-formula">Prod conforme / Prod totale</div>
+        </div>
+
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+
+        <div class="card chart-main-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Évolution des KPIs</div>
+              <div class="card-sub">7 derniers jours</div>
+            </div>
+            <div class="chart-period-tabs">
+              <button class="period-tab active" onclick="setPeriod('7j',this)">7j</button>
+              <button class="period-tab" onclick="setPeriod('30j',this)">30j</button>
+              <button class="period-tab" onclick="setPeriod('90j',this)">90j</button>
+            </div>
+          </div>
+          <canvas id="kpiChart"></canvas>
+        </div>
+
+        <div class="card losses-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Répartition des Pertes</div>
+              <div class="card-sub">Minutes perdues / jour</div>
+            </div>
+          </div>
+          <canvas id="lossChart"></canvas>
+          <div class="losses-total">Total pertes : <strong>95 min/jour</strong></div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="bottom-row">
+
+        <!-- Recommandations -->
+        <div class="card recos-card">
+          <div class="card-header">
+            <div class="card-title">Recommandations Intelligentes</div>
+            <span class="badge-count">3</span>
+          </div>
+          <div class="reco-list">
+            <div class="reco-item reco-critical">
+              <div class="reco-priority">01</div>
+              <div class="reco-body">
+                <div class="reco-title">🔧 Maintenance préventive urgente</div>
+                <div class="reco-desc">42 min de pannes/jour dégradent la disponibilité. Intervention mécanique recommandée sous 48h sur la pompe principale.</div>
+                <div class="reco-impact">Impact estimé : <strong>+15% disponibilité · <span class="montant-converti" data-eur="1440"></span></strong></div>
+              </div>
+            </div>
+            <div class="reco-item reco-warning">
+              <div class="reco-priority">02</div>
+              <div class="reco-body">
+                <div class="reco-title">⚡ Réduire les micro-arrêts</div>
+                <div class="reco-desc">18 min de micro-arrêts/jour liés au setup. Standardiser les procédures de changement de série.</div>
+                <div class="reco-impact">Impact estimé : <strong>+10% performance · <span class="montant-converti" data-eur="960"></span></strong></div>
+              </div>
+            </div>
+            <div class="reco-item reco-info">
+              <div class="reco-priority">03</div>
+              <div class="reco-body">
+                <div class="reco-title">📋 Revoir les paramètres qualité</div>
+                <div class="reco-desc">12 pièces rebutées/jour. Vérifier le réglage du dosage et la température de soudure.</div>
+                <div class="reco-impact">Impact estimé : <strong>+4% qualité · <span class="montant-converti" data-eur="360"></span></strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Simulateur -->
+        <div class="card mini-sim-card">
+          <div class="card-header">
+            <div class="card-title">Simulation Rapide</div>
+            <span class="sim-ai-badge">IA</span>
+          </div>
+          <div class="mini-sim-body">
+            <div class="sim-slider-row">
+              <label>Réduction pannes <span class="slider-val" id="sv1">20</span>%</label>
+              <input type="range" min="0" max="60" value="20" oninput="miniSim(this,'sv1')"/>
+            </div>
+            <div class="sim-slider-row">
+              <label>Réduction défauts <span class="slider-val" id="sv2">15</span>%</label>
+              <input type="range" min="0" max="60" value="15" oninput="miniSim(this,'sv2')"/>
+            </div>
+            <div class="sim-slider-row">
+              <label>Augmentation cadence <span class="slider-val" id="sv3">10</span>%</label>
+              <input type="range" min="0" max="40" value="10" oninput="miniSim(this,'sv3')"/>
+            </div>
+          </div>
+          <div class="sim-compare">
+            <div class="sim-col sim-col-before">
+              <div class="sim-col-label">Actuel</div>
+              <div class="sim-kpi-row"><span>TRS</span><span class="red">62%</span></div>
+              <div class="sim-kpi-row"><span>Dispo</span><span class="red">70%</span></div>
+              <div class="sim-kpi-row"><span>Perf</span><span class="yellow">80%</span></div>
+              <div class="sim-kpi-row"><span>Qual</span><span class="yellow">88%</span></div>
+            </div>
+            <div class="sim-arrow-col">→</div>
+            <div class="sim-col sim-col-after">
+              <div class="sim-col-label">Simulé</div>
+              <div class="sim-kpi-row"><span>TRS</span><span class="teal" id="ss-trs">78%</span></div>
+              <div class="sim-kpi-row"><span>Dispo</span><span class="teal" id="ss-dispo">84%</span></div>
+              <div class="sim-kpi-row"><span>Perf</span><span class="teal" id="ss-perf">88%</span></div>
+              <div class="sim-kpi-row"><span>Qual</span><span class="teal" id="ss-qual">92%</span></div>
+            </div>
+          </div>
+          <div class="sim-gain-banner">
+            <span>Gain potentiel estimé</span>
+            <span class="sim-gain-num" id="ss-gain">+ 4 320 €/mois</span>
+          </div>
+          <button class="btn-full" onclick="navigate('simulation')">Simulation complète →</button>
+        </div>
+
+        <!-- Pertes financières -->
+        <div class="card finance-card">
+          <div class="card-header">
+            <div class="card-title">Impact Financier</div>
+            <div class="card-sub">Aujourd'hui</div>
+          </div>
+          <div class="finance-list">
+            <div class="finance-row">
+              <div class="finance-label">
+                <span class="finance-dot red"></span>
+                Coût des pannes
+              </div>
+              <div class="finance-value red" id="cout-pannes">− 105 €/jour</div>
+            </div>
+            <div class="finance-row">
+              <div class="finance-label">
+                <span class="finance-dot yellow"></span>
+                Coût des micro-arrêts
+              </div>
+              <div class="finance-value yellow" id="cout-micro">− 45 €/jour</div>
+            </div>
+            <div class="finance-row">
+              <div class="finance-label">
+                <span class="finance-dot orange"></span>
+                Coût des rebuts
+              </div>
+              <div class="finance-value orange" id="cout-rebuts">− 30 €/jour</div>
+            </div>
+            <div class="finance-divider"></div>
+            <div class="finance-row finance-total">
+              <div class="finance-label">Pertes totales</div>
+              <div class="finance-value red" id="cout-total">− 180 €/jour</div>
+            </div>
+            <div class="finance-row finance-potential">
+              <div class="finance-label teal">Gain potentiel / mois</div>
+              <div class="finance-value teal">+ 4 320 €</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PAGE : SAISIE
+    ───────────────────────────────────────── -->
+    <div class="page" id="page-saisie">
+      <div class="form-page-wrap">
+        <div class="card form-card">
+          <div class="form-card-header">
+            <div class="card-title">Saisie des données de production</div>
+            <div class="card-sub">Renseignez les données journalières — les KPIs seront calculés automatiquement</div>
+          </div>
+
+          <form onsubmit="calculateKPI(event)">
+
+            <div class="form-section-title">Informations générales</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label>Ligne / Produit</label>
+                <select id="f-produit">
+                  <option>Ligne A — Remplissage</option>
+                  <option>Ligne B — Emballage</option>
+                  <option>Ligne C — Étiquetage</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="f-date" required/>
+              </div>
+              <div class="form-group">
+                <label>Poste / Équipe</label>
+                <select>
+                  <option>Matin (6h-14h)</option>
+                  <option>Après-midi (14h-22h)</option>
+                  <option>Nuit (22h-6h)</option>
+                  <option>Journée complète</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-section-title">Temps de production (minutes)</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label>Temps planifié <span class="form-hint">total du poste</span></label>
+                <input type="number" id="f-planifie" placeholder="480" value="480" required/>
+              </div>
+              <div class="form-group">
+                <label>Temps de panne <span class="form-hint">arrêts non planifiés</span></label>
+                <input type="number" id="f-panne" placeholder="0" value="0"/>
+              </div>
+              <div class="form-group">
+                <label>Temps micro-arrêts <span class="form-hint">arrêts &lt; 5 min</span></label>
+                <input type="number" id="f-micro" placeholder="0" value="0"/>
+              </div>
+              <div class="form-group">
+                <label>Temps setup <span class="form-hint">changements de série</span></label>
+                <input type="number" id="f-setup" placeholder="0" value="0"/>
+              </div>
+              <div class="form-group">
+                <label>Temps cycle théorique <span class="form-hint">secondes/pièce</span></label>
+                <input type="number" id="f-cycle" placeholder="30" value="30" required/>
+              </div>
+            </div>
+
+            <div class="form-section-title">Production (pièces)</div>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label>Production totale</label>
+                <input type="number" id="f-total" placeholder="0" required/>
+              </div>
+              <div class="form-group">
+                <label>Production conforme</label>
+                <input type="number" id="f-conforme" placeholder="0" required/>
+              </div>
+              <div class="form-group">
+                <label>Marge unitaire (€)</label>
+                <input type="number" id="f-marge" placeholder="2.50" value="2.50" step="0.01"/>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-accent btn-lg">Calculer les KPIs →</button>
+            </div>
+
+          </form>
+
+        </div>
+
+        <!-- Résultat KPI -->
+        <div class="card result-card" id="kpiResult" style="display:none">
+          <div class="result-header">
+            <div class="card-title">Résultats calculés</div>
+            <span class="result-badge" id="result-statut">—</span>
+          </div>
+          <div class="result-kpis">
+            <div class="result-kpi"><div class="r-val" id="r-trs">—</div><div class="r-label">TRS</div></div>
+            <div class="result-kpi"><div class="r-val" id="r-dispo">—</div><div class="r-label">Disponibilité</div></div>
+            <div class="result-kpi"><div class="r-val" id="r-perf">—</div><div class="r-label">Performance</div></div>
+            <div class="result-kpi"><div class="r-val" id="r-qual">—</div><div class="r-label">Qualité</div></div>
+          </div>
+          <div class="result-finance">
+            <div class="result-finance-row"><span>Pièces rebutées</span><span class="red" id="r-rebuts">—</span></div>
+            <div class="result-finance-row"><span>Coût des défauts</span><span class="red" id="r-cout">—</span></div>
+            <div class="result-finance-row"><span>Gain potentiel / mois</span><span class="teal" id="r-gain">—</span></div>
+          </div>
+          <button class="btn-full" onclick="navigate('dashboard')" style="margin-top:20px">Voir le dashboard →</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PAGE : SIMULATEUR
+    ───────────────────────────────────────── -->
+    <div class="page" id="page-simulation">
+      <div class="sim-page-wrap">
+        <div class="card sim-controls-card">
+          <div class="card-title">Paramètres de simulation</div>
+          <div class="card-sub" style="margin-bottom:24px">Ajustez les curseurs pour simuler des améliorations</div>
+
+          <div class="sim-full-slider">
+            <div class="sfslider-label">
+              <span>Réduction des pannes</span>
+              <span class="sfslider-val" id="sf1">20%</span>
+            </div>
+            <input type="range" min="0" max="80" value="20" oninput="fullSim()" id="sfs1"/>
+            <div class="sfslider-hint">Maintenance préventive, remplacement pièces usées</div>
+          </div>
+
+          <div class="sim-full-slider">
+            <div class="sfslider-label">
+              <span>Réduction des défauts</span>
+              <span class="sfslider-val" id="sf2">15%</span>
+            </div>
+            <input type="range" min="0" max="80" value="15" oninput="fullSim()" id="sfs2"/>
+            <div class="sfslider-hint">Réglage paramètres process, formation opérateurs</div>
+          </div>
+
+          <div class="sim-full-slider">
+            <div class="sfslider-label">
+              <span>Augmentation de cadence</span>
+              <span class="sfslider-val" id="sf3">10%</span>
+            </div>
+            <input type="range" min="0" max="40" value="10" oninput="fullSim()" id="sfs3"/>
+            <div class="sfslider-hint">Réduction micro-arrêts, optimisation flux</div>
+          </div>
+
+          <div class="sim-full-slider">
+            <div class="sfslider-label">
+              <span>Réduction temps setup</span>
+              <span class="sfslider-val" id="sf4">10%</span>
+            </div>
+            <input type="range" min="0" max="60" value="10" oninput="fullSim()" id="sfs4"/>
+            <div class="sfslider-hint">SMED, standardisation changements de série</div>
+          </div>
+        </div>
+
+        <div class="sim-results-col">
+          <div class="card sim-result-card">
+            <div class="card-title">Résultats de la simulation</div>
+            <div class="sim-result-grid" id="simResultGrid">
+              <!-- filled by JS -->
+            </div>
+            <div class="sim-gain-big">
+              <div class="sim-gain-label">GAIN MENSUEL ESTIMÉ</div>
+              <div class="sim-gain-amount" id="simGainBig">+ 4 320 €</div>
+              <div class="sim-gain-sub">basé sur une marge unitaire de 2,50 €/pièce</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">Comparaison visuelle</div>
+            <div id="simBarChartContainer"><canvas id="simBarChart"></canvas></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PAGE : PLAN D'ACTION
+    ───────────────────────────────────────── -->
+    <div class="page" id="page-decisions">
+      <div class="decisions-wrap">
+        <div class="card decisions-intro">
+          <div class="card-title">Plan d'Action Priorisé</div>
+          <div class="card-sub">Basé sur l'analyse de vos données — 3 actions identifiées pour maximiser votre TRS</div>
+          <button type="button"class="btn-accent" onclick="chargerPlanAction()" style="margin-top:12px">🔄 Actualiser avec mes données</button>
+        </div>
+        <div class="decisions-grid">
+
+          <div class="decision-card decision-critical">
+            <div class="decision-num">ACTION 1</div>
+            <div class="decision-title">🔧 Maintenance préventive</div>
+            <div class="decision-problem">
+              <div class="dp-label">PROBLÈME IDENTIFIÉ</div>
+              <div class="dp-text">42 minutes de pannes par jour → disponibilité à 70% au lieu des 85% requis. Cause probable : usure mécanique sur la pompe de dosage.</div>
+            </div>
+            <div class="decision-action">
+              <div class="dp-label">ACTION CONCRÈTE</div>
+              <div class="dp-text">Planifier une intervention technique sous 48h. Vérifier et remplacer les joints, courroies et roulements de la pompe principale. Mettre en place un suivi hebdomadaire.</div>
+            </div>
+            <div class="decision-impact">
+              <div class="di-item"><span class="di-label">Disponibilité</span><span class="di-val teal">70% → 85%</span></div>
+              <div class="di-item"><span class="di-label">TRS estimé</span><span class="di-val teal">62% → 72%</span></div>
+              <div class="di-item"><span class="di-label">Gain mensuel</span><span class="di-val teal">+ 1 440 €</span></div>
+            </div>
+            <div class="decision-urgency critical-bg">⚡ Urgence : sous 48h</div>
+          </div>
+
+          <div class="decision-card decision-warning">
+            <div class="decision-num">ACTION 2</div>
+            <div class="decision-title">⚡ Optimiser les changements de série</div>
+            <div class="decision-problem">
+              <div class="dp-label">PROBLÈME IDENTIFIÉ</div>
+              <div class="dp-text">18 min de micro-arrêts/jour dont 15 min de setup non optimisé → performance à 80%. Les opérateurs perdent du temps sur les réglages.</div>
+            </div>
+            <div class="decision-action">
+              <div class="dp-label">ACTION CONCRÈTE</div>
+              <div class="dp-text">Appliquer la méthode SMED. Documenter et standardiser les procédures de changement de série. Former les opérateurs. Objectif : setup &lt; 8 min.</div>
+            </div>
+            <div class="decision-impact">
+              <div class="di-item"><span class="di-label">Performance</span><span class="di-val teal">80% → 90%</span></div>
+              <div class="di-item"><span class="di-label">TRS estimé</span><span class="di-val teal">72% → 78%</span></div>
+              <div class="di-item"><span class="di-label">Gain mensuel</span><span class="di-val teal">+ 960 €</span></div>
+            </div>
+            <div class="decision-urgency warning-bg">📅 Planifier cette semaine</div>
+          </div>
+
+          <div class="decision-card decision-info">
+            <div class="decision-num">ACTION 3</div>
+            <div class="decision-title">📋 Réduire le taux de rebuts</div>
+            <div class="decision-problem">
+              <div class="dp-label">PROBLÈME IDENTIFIÉ</div>
+              <div class="dp-text">12 pièces rebutées/jour → qualité à 88%. Légèrement au-dessus du seuil acceptable. Probable dérive des paramètres de dosage.</div>
+            </div>
+            <div class="decision-action">
+              <div class="dp-label">ACTION CONCRÈTE</div>
+              <div class="dp-text">Vérifier et recalibrer les paramètres de dosage et de température. Mettre en place un contrôle qualité renforcé en début de poste. Revoir les SOP.</div>
+            </div>
+            <div class="decision-impact">
+              <div class="di-item"><span class="di-label">Qualité</span><span class="di-val teal">88% → 93%</span></div>
+              <div class="di-item"><span class="di-label">TRS estimé</span><span class="di-val teal">78% → 82%</span></div>
+              <div class="di-item"><span class="di-label">Gain mensuel</span><span class="di-val teal">+ 360 €</span></div>
+            </div>
+            <div class="decision-urgency info-bg">🗓 Dans les 2 semaines</div>
+          </div>
+
+        </div>
+
+        <div class="card decisions-summary">
+          <div class="ds-title">Si vous appliquez les 3 actions</div>
+          <div class="ds-kpis">
+            <div class="ds-kpi"><div class="ds-val">62%<span class="ds-arrow">→</span><span class="teal">82%</span></div><div class="ds-label">TRS</div></div>
+            <div class="ds-kpi"><div class="ds-val">70%<span class="ds-arrow">→</span><span class="teal">85%</span></div><div class="ds-label">Disponibilité</div></div>
+            <div class="ds-kpi"><div class="ds-val">80%<span class="ds-arrow">→</span><span class="teal">90%</span></div><div class="ds-label">Performance</div></div>
+            <div class="ds-kpi"><div class="ds-val">88%<span class="ds-arrow">→</span><span class="teal">93%</span></div><div class="ds-label">Qualité</div></div>
+            <div class="ds-kpi ds-gain"><div class="ds-val teal">+ 2 760 €</div><div class="ds-label">Gain / mois</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────
+         PAGE : HISTORIQUE
+    ───────────────────────────────────────── -->
+    <div class="page" id="page-historique">
+      <div class="card" style="padding:28px">
+        <div class="card-header">
+          <div class="card-title">Historique de production</div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Date</th><th>Ligne</th><th>TRS</th><th>Dispo</th><th>Perf</th><th>Qualité</th><th>Statut</th><th>Gain potentiel</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>20/02/2025</td><td>Ligne A</td><td><span class="tag-red">62%</span></td><td>70%</td><td>80%</td><td>88%</td><td><span class="badge-critical">Critique</span></td><td class="teal">+ 4 320€/mois</td></tr>
+            <tr><td>19/02/2025</td><td>Ligne B</td><td><span class="tag-yellow">74%</span></td><td>78%</td><td>84%</td><td>91%</td><td><span class="badge-warning">Attention</span></td><td class="teal">+ 2 100€/mois</td></tr>
+            <tr><td>18/02/2025</td><td>Ligne C</td><td><span class="tag-green">89%</span></td><td>93%</td><td>91%</td><td>96%</td><td><span class="badge-ok">Optimal</span></td><td class="teal">+ 800€/mois</td></tr>
+            <tr><td>17/02/2025</td><td>Ligne A</td><td><span class="tag-red">58%</span></td><td>65%</td><td>79%</td><td>87%</td><td><span class="badge-critical">Critique</span></td><td class="teal">+ 5 040€/mois</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- ─────────────────────────────────────────
+     PAGE : MON COMPTE
+───────────────────────────────────────── -->
+<div class="page" id="page-compte">
+  <div class="compte-wrap">
+
+    <!-- Informations entreprise -->
+    <div class="card compte-card">
+      <div class="card-header">
+        <div class="card-title">Informations de l'entreprise</div>
+        <button class="btn-accent-sm" onclick="sauvegarderCompte()">Sauvegarder</button>
+      </div>
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Nom de l'entreprise</label>
+          <input type="text" id="compte-nom" placeholder="Nom de l'entreprise"/>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="compte-email" placeholder="email@entreprise.com" disabled/>
+        </div>
+        <div class="form-group">
+          <label>Devise préférée</label>
+          <select id="compte-devise" onchange="changerDevise(this.value)">
+            <option value="DZD">🇩🇿 Dinar Algérien (DZD)</option>
+            <option value="EUR">🇪🇺 Euro (EUR)</option>
+            <option value="USD">🇺🇸 Dollar US (USD)</option>
+            <option value="GBP">🇬🇧 Livre Sterling (GBP)</option>
+            <option value="MAD">🇲🇦 Dirham Marocain (MAD)</option>
+            <option value="TND">🇹🇳 Dinar Tunisien (TND)</option>
+            <option value="SAR">🇸🇦 Riyal Saoudien (SAR)</option>
+            <option value="AED">🇦🇪 Dirham Émirats (AED)</option>
+            <option value="TRY">🇹🇷 Livre Turque (TRY)</option>
+            <option value="EGP">🇪🇬 Livre Égyptienne (EGP)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Changer mot de passe -->
+    <div class="card compte-card">
+      <div class="card-header">
+        <div class="card-title">Changer le mot de passe</div>
+      </div>
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label>Mot de passe actuel</label>
+          <input type="password" id="mdp-actuel" placeholder="••••••••"/>
+        </div>
+        <div class="form-group">
+          <label>Nouveau mot de passe</label>
+          <input type="password" id="mdp-nouveau" placeholder="••••••••"/>
+        </div>
+        <div class="form-group">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="mdp-confirm" placeholder="••••••••"/>
+        </div>
+      </div>
+      <div class="auth-error" id="mdp-error"></div>
+      <div style="margin-top:16px">
+        <button type="button"class="btn-accent" onclick="changerMotDePasse()">Changer le mot de passe</button>
+      </div>
+    </div>
+
+    <!-- Déconnexion -->
+    <div class="card compte-card compte-danger">
+      <div class="card-title" style="margin-bottom:12px">Session</div>
+      <div class="compte-danger-text">En vous déconnectant, vous serez redirigé vers la page de connexion.</div>
+      <button class="btn-deconnexion" onclick="seDeconnecter()">Se déconnecter</button>
+    </div>
+
+  </div>
+</div>
+<!-- ─────────────────────────────────────────
+         PAGE : VISUALISATION 3D
+    ───────────────────────────────────────── -->
+<div class="page" id="page-visualisation">
+  <div class="visu-wrap" style="display:grid;grid-template-columns:260px 1fr;gap:16px;height:calc(100vh - 140px)">
+
+    <!-- ── Panneau gauche ── -->
+    <div style="display:flex;flex-direction:column;gap:12px;overflow-y:auto">
+
+      <!-- Modes de vue -->
+      <div class="card" style="padding:16px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">🎮 MODE DE VUE</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button type="button" class="visu-mode-btn active" data-mode="production" onclick="visu3d.setMode('production',this)">
+            ⚡ Production (Flux)
+          </button>
+          <button type="button" class="visu-mode-btn" data-mode="thermique" onclick="visu3d.setMode('thermique',this)">
+            🌡️ Thermique (HACCP)
+          </button>
+          <button type="button" class="visu-mode-btn" data-mode="economique" onclick="visu3d.setMode('economique',this)">
+            💸 Économique (Pertes)
+          </button>
+          <button type="button" class="visu-mode-btn" data-mode="maintenance" onclick="visu3d.setMode('maintenance',this)">
+            🔧 Maintenance (X-Ray)
+          </button>
+        </div>
+      </div>
+
+      <!-- Niveau de vue -->
+      <div class="card" style="padding:16px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">🔍 NIVEAU DE VUE</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button type="button" class="visu-level-btn active" onclick="visu3d.setLevel('usine',this)">🏭 Vue Usine (Layout)</button>
+          <button type="button" class="visu-level-btn" onclick="visu3d.setLevel('ligne',this)">⚙️ Vue Ligne (Process)</button>
+          <button type="button" class="visu-level-btn" onclick="visu3d.setLevel('machine',this)">🔩 Vue Machine</button>
+        </div>
+      </div>
+
+      <!-- KPIs temps réel -->
+      <div class="card" style="padding:16px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">📊 KPIs EN DIRECT</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="visu-kpis">
+          <div class="visu-kpi-row"><span>TRS Global</span><span id="vkpi-trs" class="visu-kpi-val">—</span></div>
+          <div class="visu-kpi-row"><span>Temp. Process</span><span id="vkpi-temp" class="visu-kpi-val">—</span></div>
+          <div class="visu-kpi-row"><span>HSI Moyen</span><span id="vkpi-hsi" class="visu-kpi-val">—</span></div>
+          <div class="visu-kpi-row"><span>Alertes HACCP</span><span id="vkpi-haccp" class="visu-kpi-val red">—</span></div>
+          <div class="visu-kpi-row"><span>Coût énergie/h</span><span id="vkpi-energie" class="visu-kpi-val">—</span></div>
+        </div>
+      </div>
+
+      <!-- Légende -->
+      <div class="card" style="padding:16px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">🎨 LÉGENDE</div>
+        <div id="visu-legende" style="display:flex;flex-direction:column;gap:6px">
+          <div class="legende-item"><span class="legende-dot" style="background:#00FFD1"></span><span>Normal — En production</span></div>
+          <div class="legende-item"><span class="legende-dot" style="background:#f59e0b"></span><span>Alerte — Surveiller</span></div>
+          <div class="legende-item"><span class="legende-dot" style="background:#ef4444"></span><span>Critique — Intervenir</span></div>
+          <div class="legende-item"><span class="legende-dot" style="background:#8b5cf6"></span><span>Maintenance prévue</span></div>
+          <div class="legende-item"><span class="legende-dot" style="background:#3b82f6"></span><span>CIP / Nettoyage</span></div>
+        </div>
+      </div>
+
+      <!-- Contrôles caméra -->
+      <div class="card" style="padding:16px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">📷 CAMÉRA</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button type="button" class="visu-mode-btn" onclick="visu3d.resetCamera()">↺ Vue par défaut</button>
+          <button type="button" class="visu-mode-btn" id="btn-rotation" onclick="visu3d.toggleRotation()">⏸ Arrêter rotation</button>
+          <button type="button" class="visu-mode-btn" onclick="visu3d.vueDessusDessus()">⬆️ Vue de dessus</button>
+        </div>
+      </div>
+<!-- ── Zone 3D principale ── -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <!-- Barre info machine sélectionnée -->
+      <div id="visu-machine-info" class="card" style="padding:12px 18px;display:none;border-left:3px solid var(--teal)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:700;font-size:14px" id="visu-machine-nom">—</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)" id="visu-machine-details">—</div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <div style="text-align:center">
+              <div style="font-family:var(--mono);font-size:18px;font-weight:700" id="visu-machine-trs">—</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">TRS</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-family:var(--mono);font-size:18px;font-weight:700" id="visu-machine-temp">—</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">TEMP</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-family:var(--mono);font-size:18px;font-weight:700" id="visu-machine-hsi">—</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">HSI</div>
+            </div>
+            <button type="button" class="btn-accent btn-sm" onclick="visu3d.allerModule()" id="visu-goto-btn">→ Voir détails</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+ <div id="visu-ann-list" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--teal);margin-bottom:6px;letter-spacing:1px">
+      📍 POINTS D'ANNOTATION — Cliquez pour zoomer
+    </div>
+    <!-- Rempli dynamiquement par visu3d.selectMachine() -->
+  </div>
+</div>
+      <!-- Canvas Three.js -->
+      <div style="position:relative;flex:1;border-radius:var(--rl);overflow:hidden;background:#0a0f1e;border:1px solid var(--border)">
+        <canvas id="visu-canvas" style="width:100%;height:100%;display:block"></canvas>
+
+        <!-- Tooltip survol -->
+        <div id="visu-tooltip" style="display:none;position:absolute;background:rgba(10,15,30,.95);border:1px solid var(--teal);border-radius:8px;padding:10px 14px;pointer-events:none;z-index:10;backdrop-filter:blur(8px)">
+          <div style="font-weight:700;font-size:13px" id="tt-nom">—</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);margin-top:4px" id="tt-statut">—</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-m);margin-top:2px" id="tt-details">—</div>
+        </div>
+
+        <!-- Indicateur mode actif -->
+        <div style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,.5);border:1px solid var(--teal);border-radius:6px;padding:6px 12px;font-family:var(--mono);font-size:11px;color:var(--teal)" id="visu-mode-label">
+          ⚡ MODE PRODUCTION
+        </div>
+
+        <!-- Instructions -->
+        <div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.4);border-radius:6px;padding:6px 12px;font-family:var(--mono);font-size:9px;color:var(--text-d)">
+          🖱 Clic+Glisser : Orbiter · Scroll : Zoom · Clic machine : Détails
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.visu-mode-btn {
+  width: 100%; padding: 9px 12px; background: var(--bg-e);
+  border: 1px solid var(--border-b); border-radius: var(--r);
+  color: var(--text-m); font-family: var(--font); font-size: 13px;
+  font-weight: 600; cursor: pointer; text-align: left;
+  transition: all 0.18s;
+}
+.visu-mode-btn:hover { border-color: var(--teal); color: var(--teal); }
+.visu-mode-btn.active { background: var(--teal-dim); border-color: var(--teal); color: var(--teal); }
+
+.visu-level-btn {
+  width: 100%; padding: 8px 12px; background: var(--bg-e);
+  border: 1px solid var(--border-b); border-radius: var(--r);
+  color: var(--text-m); font-family: var(--font); font-size: 12px;
+  cursor: pointer; text-align: left; transition: all 0.18s;
+}
+.visu-level-btn:hover, .visu-level-btn.active { border-color: var(--teal); color: var(--teal); background: var(--teal-dim); }
+
+.visu-kpi-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono); font-size: 11px; color: var(--text-m);
+  padding: 4px 0; border-bottom: 1px solid var(--border);
+}
+.visu-kpi-val { font-weight: 700; color: var(--text); }
+.visu-kpi-val.red { color: var(--red); }
+.visu-kpi-val.green { color: var(--green); }
+.visu-kpi-val.yellow { color: var(--yellow); }
+
+.legende-item { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; color: var(--text-m); }
+.legende-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+</style>
+<!-- ─────────────────────────────────────────
+         PAGE : RECETTES & PROCESS
+    ───────────────────────────────────────── -->
+<div class="page" id="page-recettes">
+  <div class="recettes-wrap">
+
+    <!-- ── SECTION 1 : GESTIONNAIRE DE RECETTES ── -->
+    <div class="recettes-left">
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Gestionnaire de Recettes</div>
+          <button type="button" class="btn-accent-sm" onclick="ouvrirNouvelleRecette()">+ Nouvelle recette</button>
+        </div>
+
+        <div class="template-selector" id="template-selector">
+          <div class="ts-label">Choisir un modèle de recette :</div>
+          <div class="ts-grid" id="ts-grid">
+            <div class="ts-loading">Chargement des templates...</div>
+          </div>
+        </div>
+
+        <div class="recette-form" id="recette-form" style="display:none">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Nom de la recette</label>
+              <input type="text" id="rf-nom" placeholder="Ex: Yaourt Fraise 125g"/>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="rf-desc" placeholder="Notes sur ce produit"/>
+            </div>
+            <div class="form-group">
+              <label>Température cible (°C)</label>
+              <input type="number" id="rf-temp" step="0.1"/>
+            </div>
+            <div class="form-group">
+              <label>Tolérance température (±°C)</label>
+              <input type="number" id="rf-temp-tol" step="0.1" value="2"/>
+            </div>
+            <div class="form-group">
+              <label>Rendement théorique (%)</label>
+              <input type="number" id="rf-rendement" step="0.1" value="98"/>
+            </div>
+            <div class="form-group">
+              <label>pH cible</label>
+              <input type="number" id="rf-ph" step="0.1" placeholder="Optionnel"/>
+            </div>
+            <div class="form-group">
+              <label>DLC théorique (jours)</label>
+              <input type="number" id="rf-dlc" placeholder="Ex: 21"/>
+            </div>
+            <div class="form-group">
+              <label>Température stockage (°C)</label>
+              <input type="number" id="rf-temp-stockage" step="0.1" placeholder="Ex: 4"/>
+            </div>
+          </div>
+
+          <div class="ingredients-section">
+            <div class="card-title" style="margin-bottom:12px">Matières Premières</div>
+            <div id="ingredients-list"></div>
+            <button type="button" class="btn-outline" onclick="ajouterIngredient()" style="margin-top:8px">+ Ajouter ingrédient</button>
+          </div>
+
+          <input type="hidden" id="rf-template-id"/>
+          <div style="margin-top:16px; display:flex; gap:10px">
+            <button type="button" class="btn-accent" onclick="sauvegarderRecette()">💾 Sauvegarder la recette</button>
+            <button type="button"class="btn-outline" onclick="annulerRecette()">Annuler</button>
+          </div>
+        </div>
+
+        <div class="recettes-sauvegardees" id="recettes-sauvegardees">
+          <div class="rs-empty">Aucune recette sauvegardée — choisissez un template ci-dessus</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── SECTION 2 & 3 : LOTS + SIMULATEUR ── -->
+    <div class="recettes-right">
+
+      <!-- Section 2 — Suivi des Lots -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Suivi des Lots de Production</div>
+          <button type="button" class="btn-demo" onclick="chargerDemoLot()">⚗️ Mode Démo</button>
+        </div>
+
+        <div class="lot-form-grid">
+          <div class="form-group">
+            <label>Recette utilisée</label>
+            <select id="lf-recette">
+              <option value="">— Choisir une recette —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>N° Lot</label>
+            <input type="text" id="lf-numero" placeholder="LOT-2026-001"/>
+          </div>
+          <div class="form-group">
+            <label>Masse entrante (kg)</label>
+            <input type="number" id="lf-entree" step="0.1" placeholder="Ex: 1000"/>
+          </div>
+          <div class="form-group">
+            <label>Masse sortante (kg)</label>
+            <input type="number" id="lf-sortie" step="0.1" placeholder="Ex: 960"/>
+          </div>
+          <div class="form-group">
+            <label>Température réelle (°C)</label>
+            <input type="number" id="lf-temp" step="0.1" placeholder="Ex: 72"/>
+          </div>
+          <div class="form-group">
+            <label>pH réel</label>
+            <input type="number" id="lf-ph" step="0.01" placeholder="Optionnel"/>
+          </div>
+          <div class="form-group">
+            <label>Opérateur</label>
+            <input type="text" id="lf-operateur" placeholder="Nom de l'opérateur"/>
+          </div>
+          <div class="form-group">
+            <label>N° Lot Matière Première</label>
+            <input type="text" id="lf-lot-mp" placeholder="Ex: MP-2026-045"/>
+          </div>
+        </div>
+
+        <button type="button" class="btn-accent" onclick="creerLot()" style="width:100%; margin-top:12px">
+          ▶ Enregistrer le lot et analyser
+        </button>
+
+        <!-- Jauges visuelles -->
+        <div class="jauges-container" id="jauges-container" style="display:none">
+          <div class="jauge-item">
+            <div class="jauge-label">Rendement Matière</div>
+            <div class="jauge-bar-wrap">
+              <div class="jauge-cible" id="j-cible-rendement"></div>
+              <div class="jauge-reel" id="j-reel-rendement"></div>
+            </div>
+            <div class="jauge-vals">
+              <span>Cible : <strong id="jv-cible-rendement">—</strong></span>
+              <span>Réel : <strong id="jv-reel-rendement">—</strong></span>
+            </div>
+          </div>
+          <div class="jauge-item" id="jauge-temp-wrap">
+            <div class="jauge-label">Température</div>
+            <div class="jauge-bar-wrap">
+              <div class="jauge-cible" id="j-cible-temp"></div>
+              <div class="jauge-reel" id="j-reel-temp"></div>
+            </div>
+            <div class="jauge-vals">
+              <span>Cible : <strong id="jv-cible-temp">—</strong></span>
+              <span>Réel : <strong id="jv-reel-temp">—</strong></span>
+            </div>
+          </div>
+          <div class="jauge-item" id="jauge-ph-wrap" style="display:none">
+            <div class="jauge-label">pH</div>
+            <div class="jauge-bar-wrap">
+              <div class="jauge-cible" id="j-cible-ph"></div>
+              <div class="jauge-reel" id="j-reel-ph"></div>
+            </div>
+            <div class="jauge-vals">
+              <span>Cible : <strong id="jv-cible-ph">—</strong></span>
+              <span>Réel : <strong id="jv-reel-ph">—</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline événements -->
+        <div class="timeline-container" id="timeline-container">
+          <div class="timeline-title">📋 Journal de bord</div>
+          <div class="timeline-list" id="timeline-list">
+            <div class="tl-empty">Aucun événement — enregistrez un lot pour commencer</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3 — Simulateur de Capacité -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Simulateur de Capacité</div>
+        </div>
+        <div class="sim-cap-grid">
+          <div class="form-group">
+            <label>Recette</label>
+            <select id="sc-recette">
+              <option value="">— Choisir —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Objectif de production (unités)</label>
+            <input type="number" id="sc-objectif" placeholder="Ex: 5000"/>
+          </div>
+          <div class="form-group">
+            <label>TRS moyen (%)</label>
+            <input type="number" id="sc-trs" value="85" step="1"/>
+          </div>
+        </div>
+        <button type="button" class="btn-accent" onclick="simulerCapacite()" style="width:100%; margin-top:12px">
+          🔮 Calculer le planning
+        </button>
+
+        <div class="sim-cap-result" id="sim-cap-result" style="display:none">
+          <div class="scr-grid">
+            <div class="scr-item">
+              <div class="scr-label">Matières nécessaires</div>
+              <div class="scr-val teal" id="scr-matieres">—</div>
+            </div>
+            <div class="scr-item">
+              <div class="scr-label">Déchets estimés</div>
+              <div class="scr-val red" id="scr-dechets">—</div>
+            </div>
+            <div class="scr-item">
+              <div class="scr-label">Temps réel estimé</div>
+              <div class="scr-val" id="scr-temps">—</div>
+            </div>
+            <div class="scr-item">
+              <div class="scr-label">Heure de fin estimée</div>
+              <div class="scr-val teal" id="scr-fin">—</div>
+            </div>
+          </div>
+          <div class="scr-planning" id="scr-planning"></div>
+          <button class="btn-outline" onclick="exporterPlanning()" style="margin-top:12px; width:100%">
+            📅 Exporter vers Planning
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+    <!-- ─────────────────────────────────────────
+         PAGE : PRODUITS
+    ───────────────────────────────────────── -->
+    <div class="page" id="page-produits">
+      <div class="produits-wrap">
+       <div class="produits-list" id="produits-list">
+          <div class="card produit-card active-produit">
+            <div class="produit-header">
+              <div class="produit-name">Ligne A — Remplissage</div>
+              <span class="badge-critical">Critique</span>
+            </div>
+            <div class="produit-meta">Agroalimentaire · TRS actuel : <strong class="red">62%</strong></div>
+            <div class="produit-stats">
+              <div><span>Capacité</span><strong>960 pcs/j</strong></div>
+              <div><span>Cycle</span><strong>30 sec</strong></div>
+              <div><span>Marge</span><strong>2,50 €</strong></div>
+            </div>
+          </div>
+          <div class="card produit-card">
+            <div class="produit-header">
+              <div class="produit-name">Ligne B — Emballage</div>
+              <span class="badge-warning">Attention</span>
+            </div>
+            <div class="produit-meta">Agroalimentaire · TRS actuel : <strong class="yellow">74%</strong></div>
+            <div class="produit-stats">
+              <div><span>Capacité</span><strong>720 pcs/j</strong></div>
+              <div><span>Cycle</span><strong>40 sec</strong></div>
+              <div><span>Marge</span><strong>1,80 €</strong></div>
+            </div>
+          </div>
+          <div class="card produit-card">
+            <div class="produit-header">
+              <div class="produit-name">Ligne C — Étiquetage</div>
+              <span class="badge-ok">Optimal</span>
+            </div>
+            <div class="produit-meta">Agroalimentaire · TRS actuel : <strong class="teal">89%</strong></div>
+            <div class="produit-stats">
+              <div><span>Capacité</span><strong>1200 pcs/j</strong></div>
+              <div><span>Cycle</span><strong>24 sec</strong></div>
+              <div><span>Marge</span><strong>0,90 €</strong></div>
+            </div>
+          </div>
+          <button class="btn-accent btn-add-produit">+ Ajouter une ligne</button>
+        </div>
+      </div>
+    </div>
+<div id="page-haccp" class="page">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">🛡️ HACCP & Sécurité Sanitaire</h1>
+      <p class="page-subtitle">Plans HACCP digitalisés — Contrôle terrain — Libération de lots</p>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn btn-secondary" onclick="haccp.refreshIndicateurs()">
+        🔄 Actualiser
+      </button>
+      <button class="btn btn-primary" onclick="haccp.openPlanModal()">
+        + Nouveau Plan HACCP
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Sanitaires ─────────────────────────────────────── -->
+  <div class="kpi-grid" id="haccp-kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-value" id="haccp-kpi-indice">—</div>
+      <div class="kpi-label">Indice de Conformité Sanitaire</div>
+      <div class="kpi-trend" id="haccp-kpi-indice-label"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">🔴</div>
+      <div class="kpi-value" id="haccp-kpi-bloques">—</div>
+      <div class="kpi-label">Lots Bloqués</div>
+      <div class="kpi-trend" id="haccp-kpi-alertes-crit"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-value" id="haccp-kpi-liberes">—</div>
+      <div class="kpi-label">Lots Libérés</div>
+      <div class="kpi-trend" id="haccp-kpi-taux-lib"></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">⚠️</div>
+      <div class="kpi-value" id="haccp-kpi-alertes">—</div>
+      <div class="kpi-label">Alertes Non Acquittées</div>
+      <div class="kpi-trend"></div>
+    </div>
+  </div>
+
+  <!-- Onglets ─────────────────────────────────────────────── -->
+  <div class="tabs-container" style="margin-top:24px">
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="haccp.switchTab('controle')" data-tab="controle">
+        🌡️ Contrôle Sanitaire
+      </button>
+      <button class="tab-btn" onclick="haccp.switchTab('plans')" data-tab="plans">
+        📋 Plans HACCP
+      </button>
+      <button class="tab-btn" onclick="haccp.switchTab('alertes')" data-tab="alertes">
+        🚨 Alertes <span id="badge-alertes" class="badge-count" style="display:none"></span>
+      </button>
+      <button class="tab-btn" onclick="haccp.switchTab('formules')" data-tab="formules">
+        🔬 Formules Scientifiques
+      </button>
+    </div>
+
+    <!-- ── TAB : CONTRÔLE SANITAIRE ── -->
+    <div id="tab-controle" class="tab-content active-tab">
+      <div class="two-col-layout">
+
+        <!-- Formulaire saisie terrain -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Saisie Rapide — Contrôle Terrain</h3>
+          </div>
+          <div class="card-body">
+
+            <div class="form-group">
+              <label class="form-label">Lot de production</label>
+              <select id="haccp-lot-select" class="form-control"
+                      onchange="haccp.onLotChange(this.value)">
+                <option value="">— Sélectionner un lot —</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Paramètre HACCP à contrôler</label>
+              <select id="haccp-seuil-select" class="form-control"
+                      onchange="haccp.onSeuilChange(this.value)">
+                <option value="">— Sélectionner d'abord un lot —</option>
+              </select>
+            </div>
+
+            <!-- Affichage zone de sécurité -->
+            <div id="haccp-zone-info" class="haccp-zone-card" style="display:none">
+              <div class="zone-label">Zone de sécurité</div>
+              <div class="zone-range" id="haccp-zone-range"></div>
+              <div class="zone-cible" id="haccp-zone-cible"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Valeur mesurée</label>
+              <div style="position:relative">
+                <input type="number" id="haccp-valeur" class="form-control"
+                       placeholder="Ex: 74.5" step="0.1"
+                       oninput="haccp.previewConformite()" />
+                <span id="haccp-unite-badge" class="input-badge"></span>
+              </div>
+            </div>
+
+            <!-- Preview conformité en temps réel -->
+            <div id="haccp-preview" class="conformite-preview" style="display:none"></div>
+
+            <div class="form-group">
+              <label class="form-label">Opérateur</label>
+              <input type="text" id="haccp-operateur" class="form-control"
+                     placeholder="Nom de l'opérateur" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Commentaire (optionnel)</label>
+              <textarea id="haccp-commentaire" class="form-control" rows="2"
+                        placeholder="Observations terrain..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%"
+                    onclick="haccp.soumettreControle()">
+              ✅ Enregistrer le Contrôle
+            </button>
+          </div>
+        </div>
+
+        <!-- Statut du lot sélectionné -->
+        <div>
+          <div class="card" id="haccp-statut-card" style="display:none">
+            <div class="card-header">
+              <h3 class="card-title">Statut Sanitaire du Lot</h3>
+            </div>
+            <div class="card-body">
+
+              <!-- Badge statut global -->
+              <div id="haccp-statut-badge" class="lot-statut-badge">—</div>
+
+              <!-- Jauge conformité -->
+              <div class="conformite-jauge-container">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                  <span class="label-sm">Indice de Conformité</span>
+                  <span id="haccp-indice-pct" class="label-sm bold">—</span>
+                </div>
+                <div class="jauge-track">
+                  <div id="haccp-jauge-bar" class="jauge-fill" style="width:0%"></div>
+                </div>
+              </div>
+
+              <!-- Métriques -->
+              <div class="mini-kpi-grid">
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val" id="hk-nb-controles">0</div>
+                  <div class="mini-kpi-lab">Contrôles</div>
+                </div>
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val green" id="hk-nb-conformes">0</div>
+                  <div class="mini-kpi-lab">Conformes</div>
+                </div>
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val red" id="hk-nb-crit">0</div>
+                  <div class="mini-kpi-lab">Alertes Crit.</div>
+                </div>
+                <div class="mini-kpi">
+                  <div class="mini-kpi-val orange" id="hk-nb-min">0</div>
+                  <div class="mini-kpi-lab">Mineures</div>
+                </div>
+              </div>
+
+              <!-- Temps exposition risque -->
+              <div class="risque-bar" id="haccp-risque-bar">
+                <span>⏱️ Temps exposition risque :</span>
+                <span id="haccp-temps-risque" class="bold">0 min</span>
+              </div>
+
+              <!-- BOUTON LIBÉRATION — vert uniquement si tout est OK -->
+              <div id="haccp-liberation-zone" style="margin-top:16px">
+                <div id="haccp-block-msg" class="block-banner" style="display:none">
+                  🔴 LOT BLOQUÉ — NON CONFORME<br>
+                  <small>Résoudre toutes les alertes critiques avant libération</small>
+                </div>
+                <button id="haccp-btn-liberer"
+                        class="btn btn-liberation"
+                        style="display:none"
+                        onclick="haccp.libererLot()">
+                  ✅ Libérer le Lot
+                </button>
+                <div id="haccp-libere-msg" class="libere-banner" style="display:none">
+                  ✅ LOT LIBÉRÉ
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Historique contrôles lot -->
+          <div class="card" id="haccp-historique-card" style="display:none;margin-top:16px">
+            <div class="card-header">
+              <h3 class="card-title">Historique des Contrôles</h3>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="haccp-table">
+                <thead>
+                  <tr>
+                    <th>Paramètre</th>
+                    <th>Valeur</th>
+                    <th>Zone</th>
+                    <th>Statut</th>
+                    <th>Heure</th>
+                  </tr>
+                </thead>
+                <tbody id="haccp-controles-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-controle -->
+
+    <!-- ── TAB : PLANS HACCP ── -->
+    <div id="tab-plans" class="tab-content" style="display:none">
+      <div id="plans-haccp-list"></div>
+    </div>
+
+    <!-- ── TAB : ALERTES ── -->
+    <div id="tab-alertes" class="tab-content" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3>Alertes HACCP Actives</h3>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px">
+          <input type="checkbox" id="show-all-alertes"
+                 onchange="haccp.loadAlertes(this.checked)"> Afficher aussi les acquittées
+        </label>
+      </div>
+      <div id="alertes-list"></div>
+    </div>
+
+    <!-- ── TAB : FORMULES SCIENTIFIQUES ── -->
+    <div id="tab-formules" class="tab-content" style="display:none">
+      <div class="two-col-layout">
+
+        <!-- Valeur Pasteurisatrice -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">🌡️ Valeur Pasteurisatrice (VP)</h3>
+          </div>
+          <div class="card-body">
+            <p class="form-help">
+              Modèle de Bigelow — vérifie si un traitement thermique atteint
+              l'équivalent de 15 s à 72°C (standard HTST lait).
+            </p>
+            <div class="formula-box">
+              VP = t × 10<sup>(T − T<sub>réf</sub>) / z</sup>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Température de traitement (°C)</label>
+                <input type="number" id="vp-temp" class="form-control"
+                       value="74" step="0.5" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Durée effective (secondes)</label>
+                <input type="number" id="vp-duree" class="form-control"
+                       value="20" step="1" />
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Température référence (°C)</label>
+                <input type="number" id="vp-tref" class="form-control"
+                       value="72" step="0.5" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Valeur z (°C)</label>
+                <input type="number" id="vp-z" class="form-control"
+                       value="8" step="0.5" />
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%"
+                    onclick="haccp.calculerVP()">
+              Calculer VP
+            </button>
+            <div id="vp-result" style="margin-top:16px"></div>
+            <canvas id="vp-chart" height="160" style="margin-top:16px;display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Cinétique pH -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">🧪 Cinétique du pH — Fermentation</h3>
+          </div>
+          <div class="card-body">
+            <p class="form-help">
+              Modèle logistique de fermentation lactique — compare la courbe
+              réelle au profil théorique.
+            </p>
+            <div class="formula-box">
+              pH(t) = pH<sub>cible</sub> + Δ / (1 + e<sup>k·(t − t½)</sup>)
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Type de ferment</label>
+                <select id="ph-ferment" class="form-control">
+                  <option value="yaourt">Yaourt (L. bulgaricus)</option>
+                  <option value="fromage">Fromage (Lc. lactis)</option>
+                  <option value="kefir">Kéfir (mix)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Température étuve (°C)</label>
+                <input type="number" id="ph-temp" class="form-control"
+                       value="42" step="0.5" />
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">pH initial du lait</label>
+                <input type="number" id="ph-initial" class="form-control"
+                       value="6.5" step="0.1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">pH cible</label>
+                <input type="number" id="ph-cible" class="form-control"
+                       value="4.3" step="0.1" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Durée de fermentation (heures)</label>
+              <input type="number" id="ph-duree" class="form-control"
+                     value="4" step="0.5" />
+            </div>
+            <button class="btn btn-primary" style="width:100%"
+                    onclick="haccp.calculerPH()">
+              Simuler Cinétique pH
+            </button>
+            <div id="ph-result" style="margin-top:16px"></div>
+            <canvas id="ph-chart" height="160" style="margin-top:16px;display:none"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-formules -->
+
+  </div><!-- /tabs-container -->
+
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL — NOUVEAU PLAN HACCP
+     ═══════════════════════════════════════════════════════════ -->
+<div id="modal-plan-haccp" class="modal-overlay" style="display:none" onclick="haccp.closePlanModal(event)">
+  <div class="modal-box wide-modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>📋 Nouveau Plan HACCP</h2>
+      <button class="modal-close" onclick="haccp.closePlanModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Recette associée</label>
+          <select id="plan-recette-select" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nom du plan</label>
+          <input type="text" id="plan-nom" class="form-control"
+                 placeholder="Ex: HACCP Pasteurisation Lait A" />
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Version</label>
+          <input type="text" id="plan-version" class="form-control" value="1.0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsable</label>
+          <input type="text" id="plan-responsable" class="form-control"
+                 placeholder="Responsable Qualité" />
+        </div>
+      </div>
+
+      <div style="margin:20px 0 12px;display:flex;justify-content:space-between;align-items:center">
+        <h4>Points de Contrôle Critiques (CCP)</h4>
+        <button class="btn btn-secondary btn-sm" onclick="haccp.addSeuilRow()">
+          + Ajouter un CCP
+        </button>
+      </div>
+
+      <div id="seuils-container">
+        <!-- Ligne CCP template -->
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:12px;justify-content:flex-end">
+        <button class="btn btn-secondary" onclick="haccp.closePlanModal()">Annuler</button>
+        <button class="btn btn-primary" onclick="haccp.sauvegarderPlan()">
+          💾 Créer le Plan HACCP
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     STYLES CSS MODULE 3 — à ajouter dans style.css
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+/* ══════════════════════════════════════════════════════
+   TWINOVA — MODULE HACCP — CSS aligné avec le design system
+   ══════════════════════════════════════════════════════ */
+
+/* ── Page header ─────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.page-subtitle {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-m);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Boutons HACCP ───────────────────────────────────── */
+.btn { padding: 9px 18px; border-radius: var(--r); font-family: var(--font); font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.18s; border: none; }
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn-secondary { background: transparent; color: var(--text-m); border: 1px solid var(--border-b); }
+.btn-secondary:hover { color: var(--teal); border-color: var(--teal); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+/* ── KPI cards HACCP ─────────────────────────────────── */
+#haccp-kpi-grid .kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+}
+.kpi-icon { font-size: 20px; }
+.kpi-value { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--text); }
+.kpi-label { font-family: var(--mono); font-size: 10px; color: var(--text-m); letter-spacing: 0.5px; }
+.kpi-trend { font-family: var(--mono); font-size: 10px; color: var(--teal); }
+
+/* ── Onglets ─────────────────────────────────────────── */
+.tabs-container {
+  background: var(--bg-s);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+  margin-top: 20px;
+}
+.tabs-nav {
+  display: flex;
+  background: var(--bg-e);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.tab-btn {
+  padding: 14px 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-m);
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.18s;
+  letter-spacing: 0.3px;
+}
+.tab-btn:hover { color: var(--text); background: var(--bg-h); }
+.tab-btn.active { color: var(--teal); background: var(--bg-s); }
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--teal);
+}
+.tab-content { padding: 24px; display: none; }
+.tab-content.active-tab { display: block; }
+
+/* ── Layout 2 colonnes ───────────────────────────────── */
+.two-col-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media(max-width:900px){ .two-col-layout { grid-template-columns: 1fr; } }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── Formulaire ──────────────────────────────────────── */
+.card-body { padding: 0; }
+.form-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-m);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.form-control {
+  width: 100%;
+  background: var(--bg-e);
+  border: 1px solid var(--border-b);
+  color: var(--text);
+  padding: 10px 13px;
+  border-radius: var(--r);
+  font-family: var(--font);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.form-control:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-dim); }
+textarea.form-control { resize: vertical; min-height: 70px; }
+.form-help { font-family: var(--mono); font-size: 10px; color: var(--text-m); margin-bottom: 14px; line-height: 1.6; }
+
+/* ── Zone de sécurité ────────────────────────────────── */
+.haccp-zone-card {
+  background: var(--teal-dim);
+  border: 1px solid var(--teal);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+.zone-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--teal); font-weight: 600; margin-bottom: 4px; }
+.zone-range { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); }
+.zone-cible { font-family: var(--mono); font-size: 11px; color: var(--text-m); margin-top: 2px; }
+
+/* ── Badge unité ─────────────────────────────────────── */
+.input-badge {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  color: var(--teal); background: var(--teal-dim);
+  padding: 2px 8px; border-radius: 4px;
+}
+
+/* ── Preview conformité ──────────────────────────────── */
+.conformite-preview {
+  padding: 10px 14px; border-radius: var(--r);
+  font-family: var(--mono); font-weight: 600; font-size: 12px;
+  margin-bottom: 12px; letter-spacing: 0.3px;
+}
+.preview-ok  { background: rgba(26,138,74,0.08); color: var(--green); border: 1px solid rgba(26,138,74,0.2); }
+.preview-nok { background: rgba(217,48,37,0.08); color: var(--red);   border: 1px solid rgba(217,48,37,0.2); }
+
+/* ── Badge statut lot ────────────────────────────────── */
+.lot-statut-badge {
+  text-align: center; padding: 12px 16px;
+  border-radius: var(--r); font-family: var(--font);
+  font-weight: 700; font-size: 14px; margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+.statut-en_attente { background: rgba(107,70,193,0.08); color: #6b46c1; border: 1px solid rgba(107,70,193,0.2); }
+.statut-conforme   { background: rgba(26,138,74,0.08);  color: var(--green); border: 1px solid rgba(26,138,74,0.2); }
+.statut-bloque     { background: rgba(217,48,37,0.08);  color: var(--red);   border: 1px solid rgba(217,48,37,0.2); animation: pulse-rouge 1.5s infinite; }
+.statut-libere     { background: var(--teal-dim);        color: var(--teal);  border: 1px solid var(--teal); }
+@keyframes pulse-rouge { 0%,100%{ box-shadow: 0 0 0 0 rgba(217,48,37,.3); } 50%{ box-shadow: 0 0 0 8px rgba(217,48,37,0); } }
+
+/* ── Jauge conformité ────────────────────────────────── */
+.conformite-jauge-container { margin-bottom: 16px; }
+.label-sm { font-family: var(--mono); font-size: 10px; color: var(--text-m); }
+.bold { font-weight: 700; color: var(--text); }
+.jauge-track { height: 6px; background: var(--bg-h); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.jauge-fill  { height: 100%; border-radius: 3px; transition: width 0.6s ease; background: var(--teal); }
+
+/* ── Mini KPIs ───────────────────────────────────────── */
+.mini-kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+.mini-kpi { text-align: center; background: var(--bg-e); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 6px; }
+.mini-kpi-val { font-family: var(--mono); font-size: 22px; font-weight: 700; }
+.mini-kpi-lab { font-family: var(--mono); font-size: 9px; color: var(--text-m); margin-top: 3px; letter-spacing: 0.5px; }
+
+/* ── Risque bar ──────────────────────────────────────── */
+.risque-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+  border-radius: var(--r); padding: 8px 14px;
+  font-family: var(--mono); font-size: 11px; color: var(--orange); margin-bottom: 12px;
+}
+
+/* ── Blocage / Libération ────────────────────────────── */
+.block-banner {
+  background: rgba(217,48,37,0.06); border: 1px solid rgba(217,48,37,0.25);
+  border-left: 3px solid var(--red);
+  border-radius: var(--r); padding: 14px 16px;
+  color: var(--red); font-weight: 700; font-size: 13px; line-height: 1.6;
+}
+.libere-banner {
+  background: rgba(26,138,74,0.06); border: 1px solid rgba(26,138,74,0.25);
+  border-left: 3px solid var(--green);
+  border-radius: var(--r); padding: 14px 16px;
+  color: var(--green); font-weight: 700; font-size: 13px;
+}
+.btn-liberation {
+  width: 100%; background: var(--green); color: #fff;
+  font-family: var(--font); font-size: 15px; font-weight: 700;
+  padding: 13px; border-radius: var(--r); border: none; cursor: pointer;
+  transition: all 0.18s; letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(26,138,74,.3);
+}
+.btn-liberation:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,138,74,.4); }
+
+/* ── Table contrôles ─────────────────────────────────── */
+.haccp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.haccp-table th {
+  background: var(--bg-e); padding: 10px 16px; text-align: left;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-m); border-bottom: 1px solid var(--border-b);
+}
+.haccp-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-family: var(--font); }
+.haccp-table tr:hover td { background: var(--bg-e); }
+.tag-conforme { font-family: var(--mono); font-size: 10px; font-weight: 600; background: rgba(26,138,74,0.1); color: var(--green); padding: 3px 8px; border-radius: 4px; }
+.tag-nc       { font-family: var(--mono); font-size: 10px; font-weight: 600; background: rgba(217,48,37,0.1); color: var(--red);   padding: 3px 8px; border-radius: 4px; }
+
+/* ── Alertes ─────────────────────────────────────────── */
+.alerte-card { border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; border: 1px solid; border-left: 3px solid; transition: all 0.18s; }
+.alerte-card:hover { transform: translateX(2px); }
+.alerte-critique { background: rgba(217,48,37,0.04); border-color: rgba(217,48,37,0.15); border-left-color: var(--red); }
+.alerte-mineure  { background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.15); border-left-color: var(--yellow); }
+.alerte-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.alerte-titre { font-weight: 700; font-size: 14px; letter-spacing: 0.3px; }
+.alerte-critique .alerte-titre { color: var(--red); }
+.alerte-mineure  .alerte-titre { color: var(--orange); }
+.alerte-message  { font-size: 13px; color: var(--text); margin-bottom: 6px; }
+.alerte-action   { font-family: var(--mono); font-size: 10px; color: var(--text-m); }
+.alerte-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.alerte-time { font-family: var(--mono); font-size: 10px; color: var(--text-d); }
+
+/* ── Badge alertes nav ───────────────────────────────── */
+.badge-count { display: inline-block; background: var(--red); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 10px; font-weight: 700; margin-left: 4px; font-family: var(--mono); }
+
+/* ── Plans HACCP ─────────────────────────────────────── */
+.plan-card { border: 1px solid var(--border); border-radius: var(--rl); margin-bottom: 14px; overflow: hidden; transition: border-color 0.18s; }
+.plan-card:hover { border-color: var(--teal); }
+.plan-card-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--bg-e); border-bottom: 1px solid var(--border); cursor: pointer; }
+.plan-card-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: 0.3px; }
+.plan-card-meta  { font-family: var(--mono); font-size: 10px; color: var(--text-m); margin-top: 3px; }
+.plan-badge { font-family: var(--mono); padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal); }
+.seuil-row { display: grid; grid-template-columns: 2fr 1fr 1.5fr 1.5fr; gap: 14px; align-items: start; padding: 12px 20px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.seuil-row:last-child { border-bottom: none; }
+.seuil-type-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-family: var(--mono); font-size: 10px; font-weight: 600; }
+.type-temperature { background: var(--teal-dim); color: var(--teal); }
+.type-ph          { background: rgba(26,138,74,0.1); color: var(--green); }
+.type-metal       { background: rgba(217,48,37,0.1); color: var(--red); }
+.type-humidite    { background: rgba(0,87,184,0.08); color: #0057b8; }
+.type-microbiologie { background: rgba(107,70,193,0.1); color: #6b46c1; }
+.type-visuel      { background: rgba(245,158,11,0.1); color: var(--yellow); }
+
+/* ── Formules scientifiques ──────────────────────────── */
+.formula-box {
+  font-family: Georgia, serif; font-size: 16px;
+  background: var(--bg-e); border: 1px solid var(--border-b);
+  border-left: 3px solid var(--teal);
+  border-radius: var(--r); padding: 14px 18px;
+  text-align: center; color: var(--text); margin-bottom: 16px;
+}
+.vp-result-card { border-radius: var(--r); padding: 18px; border: 1px solid; }
+.vp-ok  { background: rgba(26,138,74,0.06);  border-color: rgba(26,138,74,0.2); }
+.vp-nok { background: rgba(217,48,37,0.06);  border-color: rgba(217,48,37,0.2); }
+.vp-valeur { font-family: var(--mono); font-size: 30px; font-weight: 700; }
+
+/* ── Modal ───────────────────────────────────────────── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+.modal-box { background: var(--bg-s); border: 1px solid var(--border); border-radius: var(--rl); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+.wide-modal { max-width: 860px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+.modal-header h2 { font-family: var(--font); font-size: 17px; font-weight: 700; margin: 0; letter-spacing: 0.5px; }
+.modal-close { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-m); padding: 6px 10px; border-radius: var(--r); transition: all 0.18s; }
+.modal-close:hover { background: var(--bg-e); color: var(--text); }
+.modal-body { padding: 24px; }
+
+/* ── Ligne seuil dans modal ──────────────────────────── */
+.seuil-form-row { background: var(--bg-e); border-radius: var(--r); padding: 16px; margin-bottom: 10px; border: 1px solid var(--border); position: relative; }
+.seuil-form-row .remove-btn { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; color: var(--red); font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: all 0.18s; }
+.seuil-form-row .remove-btn:hover { background: rgba(217,48,37,0.1); }
+</style>
+<!-- =============================================================
+     TWINOVA — MODULE 4 : OPTIMISATION ÉNERGÉTIQUE & ÉCONOMIQUE
+     À coller dans index.html juste avant </main>
+     ============================================================= -->
+
+<!-- NAV à ajouter dans la sidebar :
+<a href="#" class="nav-item" data-page="energie">
+    <svg class="nav-icon" viewBox="0 0 20 20"><path d="M11 2L4 12h7l-2 6 9-10h-7l2-6z" fill="currentColor"/></svg>
+    Énergie & Économie
+</a>
+-->
+
+<div class="page" id="page-energie">
+
+  <!-- ── Topbar interne ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title" style="font-size:22px;font-weight:700">⚡ Optimisation Énergétique</div>
+      <div class="page-sub">Intensité énergétique · Loss Costing · Bilan Carbone · Audit mensuel</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-outline" onclick="energie.refresh()">🔄 Actualiser</button>
+      <button class="btn-accent" onclick="energie.genererAudit()">📊 Générer Audit</button>
+    </div>
+  </div>
+
+  <!-- ── KPIs Énergie ── -->
+  <div class="kpi-grid" id="energie-kpi-grid">
+
+    <!-- Score Efficacité -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">SCORE EFFICACITÉ</span>
+        <span class="kpi-status" id="energie-score-badge">—</span>
+      </div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="energie-score">—</div>
+        <div class="kpi-pct">/100</div>
+        <svg class="kpi-ring" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" stroke="#1a1f2e" stroke-width="6" fill="none"/>
+          <circle cx="40" cy="40" r="32" stroke="#0057b8" stroke-width="6" fill="none"
+            stroke-dasharray="201" stroke-dashoffset="100" stroke-linecap="round"
+            transform="rotate(-90 40 40)" id="ring-energie"/>
+        </svg>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target">Objectif : 85/100</div>
+        <div class="kpi-delta" id="energie-score-delta">—</div>
+      </div>
+      <div class="kpi-formula">EPI vs cibles définies</div>
+    </div>
+
+    <!-- Coût Énergie Mois -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">COÛT ÉNERGIE / MOIS</span>
+        <span class="kpi-status ok" id="energie-cout-badge">30 JOURS</span>
+      </div>
+      <div class="kpi-main" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div class="kpi-number" id="energie-cout" style="font-size:28px">—</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target" id="energie-economies">Économies potentielles : —</div>
+      </div>
+      <div class="kpi-formula">Électricité + Eau + Gaz</div>
+    </div>
+
+    <!-- EPI Électricité -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">EPI ÉLECTRICITÉ</span>
+        <span class="kpi-status" id="energie-epi-badge">—</span>
+      </div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="energie-epi" style="font-size:32px">—</div>
+        <div class="kpi-pct" style="font-size:14px">kWh/u</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target">Cible : 0.15 kWh/u</div>
+        <div class="kpi-delta" id="energie-epi-ecart">—</div>
+      </div>
+      <div class="kpi-formula">kWh consommés / unités produites</div>
+    </div>
+
+    <!-- Bilan Carbone -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">BILAN CARBONE</span>
+        <span class="kpi-status warning">CO₂</span>
+      </div>
+      <div class="kpi-main" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <div class="kpi-number" id="energie-co2" style="font-size:28px">—</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">kg CO₂ / mois</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target" id="energie-co2-unite">— g CO₂ / unité</div>
+        <div class="kpi-delta" id="energie-co2-equiv" style="color:var(--green)">—</div>
+      </div>
+      <div class="kpi-formula">Conso × facteur émission</div>
+    </div>
+
+  </div>
+
+  <!-- ── Energy Pulse ── -->
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-top:16px">
+
+    <!-- Widget Energy Pulse -->
+    <div class="card" id="energy-pulse-card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">⚡ Energy Pulse</div>
+          <div class="card-sub">Coût énergétique estimé du lot en cours</div>
+        </div>
+        <select id="pulse-type" class="btn-outline" style="font-size:12px;padding:5px 10px"
+                onchange="energie.updatePulse()">
+          <option value="electricite">⚡ Électricité</option>
+          <option value="eau">💧 Eau</option>
+          <option value="gaz">🔥 Gaz</option>
+        </select>
+      </div>
+      <div style="padding:10px 0">
+        <!-- Jauge circulaire -->
+        <div style="position:relative;width:160px;height:160px;margin:0 auto">
+          <svg viewBox="0 0 160 160" style="width:100%;height:100%">
+            <!-- Fond -->
+            <circle cx="80" cy="80" r="60" stroke="var(--bg-h)" stroke-width="12" fill="none"/>
+            <!-- Valeur -->
+            <circle cx="80" cy="80" r="60" id="pulse-ring"
+              stroke="var(--teal)" stroke-width="12" fill="none"
+              stroke-dasharray="377" stroke-dashoffset="300"
+              stroke-linecap="round" transform="rotate(-90 80 80)"
+              style="transition:stroke-dashoffset 0.8s ease,stroke 0.4s"/>
+            <!-- Zones -->
+            <text x="80" y="72" text-anchor="middle" font-family="JetBrains Mono" font-size="22" font-weight="700" fill="var(--text)" id="pulse-val">—</text>
+            <text x="80" y="90" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="var(--text-m)" id="pulse-unite">DZD/h</text>
+            <text x="80" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="var(--text-d)" id="pulse-label">estimé</text>
+          </svg>
+        </div>
+
+        <!-- Détails -->
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:var(--bg-e);border-radius:var(--r);padding:10px;text-align:center">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Période creuse</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--green)" id="pulse-creuse">— DZD</div>
+          </div>
+          <div style="background:var(--bg-e);border-radius:var(--r);padding:10px;text-align:center">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Période pointe</div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--red)" id="pulse-pointe">— DZD</div>
+          </div>
+        </div>
+
+        <!-- Comparaison shifts -->
+        <div style="margin-top:12px;background:var(--bg-e);border-radius:var(--r);padding:12px;border:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text-m);letter-spacing:1px;margin-bottom:8px">COMPARAISON SHIFTS</div>
+          <div id="shifts-compare" style="font-size:12px;color:var(--text-m)">Chargement…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphique Productivité vs Énergie -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📈 Productivité vs Énergie</div>
+          <div class="card-sub">Vérifier que la cadence n'explose pas la consommation</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="period-tab active" onclick="energie.setGraphPeriod('7j',this)">7j</button>
+          <button class="period-tab" onclick="energie.setGraphPeriod('30j',this)">30j</button>
+        </div>
+      </div>
+      <canvas id="energie-chart" height="220"></canvas>
+    </div>
+
+  </div>
+
+  <!-- ── Onglets ── -->
+  <div class="card" style="margin-top:16px;padding:0;overflow:hidden">
+
+    <div style="display:flex;background:var(--bg-e);border-bottom:1px solid var(--border)">
+      <button class="tab-btn active" onclick="energie.switchTab('saisie')" data-etab="saisie">📥 Saisie Énergie</button>
+      <button class="tab-btn" onclick="energie.switchTab('loss')" data-etab="loss">💸 Loss Costing</button>
+      <button class="tab-btn" onclick="energie.switchTab('audit')" data-etab="audit">📋 Audit Mensuel</button>
+      <button class="tab-btn" onclick="energie.switchTab('carbone')" data-etab="carbone">🌿 Bilan Carbone</button>
+      <button class="tab-btn" onclick="energie.switchTab('tarifs')" data-etab="tarifs">⚙️ Tarifs & Seuils</button>
+    </div>
+
+    <!-- TAB : SAISIE ÉNERGIE -->
+    <div id="etab-saisie" class="etab active-etab" style="padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">NOUVELLE SAISIE</div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Type d'énergie</label>
+              <select id="e-type" class="form-group input" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px" onchange="energie.onTypeChange()">
+                <option value="electricite">⚡ Électricité (kWh)</option>
+                <option value="eau">💧 Eau (m³)</option>
+                <option value="gaz">🔥 Gaz (m³)</option>
+                <option value="fioul">🛢 Fioul (L)</option>
+                <option value="vapeur">♨️ Vapeur (kg)</option>
+                <option value="air_comprime">💨 Air comprimé (Nm³)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Période tarifaire</label>
+              <select id="e-periode" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="pleine">Pleine (jour)</option>
+                <option value="creuse">Creuse (nuit)</option>
+                <option value="pointe">Pointe (pic)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="e-date" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Shift</label>
+              <select id="e-shift" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="matin">Matin (6h-14h)</option>
+                <option value="jour">Jour (8h-18h)</option>
+                <option value="soir">Soir (14h-22h)</option>
+                <option value="nuit">Nuit (22h-6h)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Consommation <span id="e-unite-label" style="color:var(--teal)">(kWh)</span></label>
+              <input type="number" id="e-consommation" placeholder="Ex: 450" step="0.1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="energie.previewCout()"/>
+            </div>
+            <div class="form-group">
+              <label>Unités produites</label>
+              <input type="number" id="e-production" placeholder="Ex: 3000" step="1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="energie.previewCout()"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Opérateur</label>
+            <input type="text" id="e-operateur" placeholder="Nom de l'opérateur"
+              style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+          </div>
+
+          <!-- Preview -->
+          <div id="e-preview" style="display:none;background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--r);padding:12px;margin:10px 0">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:1px;margin-bottom:6px">PRÉVISUALISATION</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)" id="prev-cout">—</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">COÛT DZD</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)" id="prev-epi">—</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">EPI kWh/u</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)" id="prev-co2">—</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">kg CO₂</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-accent" style="width:100%;margin-top:4px" onclick="energie.saisir()">
+            ⚡ Enregistrer la Consommation
+          </button>
+        </div>
+
+        <!-- Historique récent -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">DERNIÈRES SAISIES</div>
+          <table class="data-table" id="energie-historique-table">
+            <thead><tr>
+              <th>Date</th><th>Type</th><th>Conso</th><th>EPI</th><th>Coût</th><th>Alerte</th>
+            </tr></thead>
+            <tbody id="energie-historique-body">
+              <tr><td colspan="6" style="text-align:center;color:var(--text-m);padding:20px">Aucune saisie</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : LOSS COSTING -->
+    <div id="etab-loss" class="etab" style="display:none;padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:6px">COÛT RÉEL D'UN LOT RATÉ</div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--text-m);margin-bottom:16px;line-height:1.6">
+            La perte réelle dépasse toujours la simple marge perdue. TWINOVA décompose le vrai coût industriel.
+          </p>
+
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Quantité perdue (kg)</label>
+              <input type="number" id="lc-quantite" placeholder="Ex: 120" step="0.1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Coût matière (DZD/kg)</label>
+              <input type="number" id="lc-cout-matiere" placeholder="Ex: 85" step="1"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Heures opérateur</label>
+              <input type="number" id="lc-heures" placeholder="Ex: 2" step="0.5"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Taux horaire (DZD/h)</label>
+              <input type="number" id="lc-taux" value="800" step="50"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Énergie gaspillée (kWh)</label>
+              <input type="number" id="lc-energie" placeholder="Ex: 45" step="0.5"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Coût traitement déchet (DZD)</label>
+              <input type="number" id="lc-traitement" placeholder="Ex: 500" step="100"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+          </div>
+          <button class="btn-accent" style="width:100%" onclick="energie.calculerLossCosting()">
+            💸 Calculer le Coût Réel
+          </button>
+        </div>
+
+        <!-- Résultat Loss Costing -->
+        <div id="loss-result" style="display:none">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:1.5px;margin-bottom:14px">DÉCOMPOSITION DU COÛT RÉEL</div>
+          <div id="loss-total" style="background:rgba(217,48,37,.06);border:1px solid rgba(217,48,37,.2);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:16px">
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">COÛT TOTAL RÉEL</div>
+            <div style="font-family:var(--mono);font-size:36px;font-weight:700;color:var(--red)" id="loss-total-val">—</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">DZD</div>
+          </div>
+          <canvas id="loss-chart" height="200"></canvas>
+          <div id="loss-interpretation" style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--text-m);line-height:1.6;padding:12px;background:var(--bg-e);border-radius:var(--r)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : AUDIT MENSUEL -->
+    <div id="etab-audit" class="etab" style="display:none;padding:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px">RAPPORT D'AUDIT MENSUEL</div>
+          <p style="font-family:var(--mono);font-size:11px;color:var(--text-m);margin-top:4px">Généré automatiquement à partir de vos saisies</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select id="audit-mois" style="padding:8px 12px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px">
+            <option value="1">Janvier</option><option value="2">Février</option>
+            <option value="3">Mars</option><option value="4">Avril</option>
+            <option value="5">Mai</option><option value="6">Juin</option>
+            <option value="7">Juillet</option><option value="8">Août</option>
+            <option value="9">Septembre</option><option value="10">Octobre</option>
+            <option value="11">Novembre</option><option value="12">Décembre</option>
+          </select>
+          <input type="number" id="audit-annee" value="2026" min="2020" max="2030"
+            style="padding:8px 12px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px;width:80px"/>
+          <button class="btn-accent" onclick="energie.genererAudit()">📊 Générer</button>
+        </div>
+      </div>
+      <div id="audit-result"></div>
+    </div>
+
+    <!-- TAB : BILAN CARBONE -->
+    <div id="etab-carbone" class="etab" style="display:none;padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:1.5px;margin-bottom:16px">🌿 EMPREINTE CARBONE ANNUELLE</div>
+          <div id="carbone-result">
+            <div style="background:rgba(26,138,74,.06);border:1px solid rgba(26,138,74,.2);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:16px">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--text-m)">CO₂ TOTAL</div>
+              <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:var(--green)" id="co2-total-val">—</div>
+              <div style="font-family:var(--mono);font-size:13px;color:var(--text-m)">kg CO₂ / an</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div style="background:var(--bg-e);border-radius:var(--r);padding:14px;text-align:center">
+                <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text)" id="co2-arbres">—</div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">🌳 arbres à planter</div>
+              </div>
+              <div style="background:var(--bg-e);border-radius:var(--r);padding:14px;text-align:center">
+                <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text)" id="co2-km">—</div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text-m)">🚗 km équivalent</div>
+              </div>
+            </div>
+            <div id="co2-objectif" style="margin-top:12px;padding:12px;background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--r);font-family:var(--mono);font-size:11px;color:var(--teal);line-height:1.6"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:1.5px;margin-bottom:16px">RÉPARTITION PAR SOURCE</div>
+          <canvas id="carbone-chart" height="260"></canvas>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn-accent" onclick="energie.chargerCarbone()">🔄 Calculer le Bilan Carbone</button>
+      </div>
+    </div>
+
+    <!-- TAB : TARIFS & SEUILS -->
+    <div id="etab-tarifs" class="etab" style="display:none;padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <!-- Tarifs -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">CONFIGURER LES TARIFS</div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Type d'énergie</label>
+              <select id="t-type" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="electricite">⚡ Électricité</option>
+                <option value="eau">💧 Eau</option>
+                <option value="gaz">🔥 Gaz</option>
+                <option value="fioul">🛢 Fioul</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Période</label>
+              <select id="t-periode" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="pleine">Pleine</option>
+                <option value="creuse">Creuse</option>
+                <option value="pointe">Pointe</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr">
+            <div class="form-group">
+              <label>Prix unitaire (DZD)</label>
+              <input type="number" id="t-prix" placeholder="Ex: 7.50" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label>Facteur CO₂ (kg/unité)</label>
+              <input type="number" id="t-co2" placeholder="0.512" step="0.001"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+          </div>
+          <button class="btn-accent" style="width:100%" onclick="energie.sauvegarderTarif()">💾 Enregistrer le Tarif</button>
+
+          <div style="margin-top:16px" id="tarifs-list"></div>
+        </div>
+
+        <!-- Seuils EPI -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--orange);letter-spacing:1.5px;margin-bottom:14px">DÉFINIR LES SEUILS EPI</div>
+          <div class="form-group">
+            <label>Type d'énergie</label>
+            <select id="s-type" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+              <option value="electricite">⚡ Électricité (kWh/unité)</option>
+              <option value="eau">💧 Eau (L/unité)</option>
+              <option value="gaz">🔥 Gaz (m³/unité)</option>
+            </select>
+          </div>
+          <div class="form-grid-3" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="form-group">
+              <label style="color:var(--green)">🎯 Cible</label>
+              <input type="number" id="s-cible" placeholder="0.15" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid rgba(26,138,74,.3);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label style="color:var(--yellow)">⚠️ Alerte</label>
+              <input type="number" id="s-alerte" placeholder="0.20" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid rgba(245,158,11,.3);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label style="color:var(--red)">🔴 Critique</label>
+              <input type="number" id="s-critique" placeholder="0.28" step="0.01"
+                style="width:100%;padding:10px;background:var(--bg-e);border:1px solid rgba(217,48,37,.3);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+          </div>
+          <button class="btn-accent" style="width:100%" onclick="energie.sauvegarderSeuil()">💾 Enregistrer le Seuil</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ── Onglets énergie ─────────────────────────────────── */
+.etab { display: none; }
+.active-etab { display: block; }
+.tab-btn {
+  padding: 13px 20px; border: none; background: transparent;
+  cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 600;
+  color: var(--text-m); white-space: nowrap; position: relative; transition: all 0.18s;
+}
+.tab-btn:hover { color: var(--text); background: var(--bg-h); }
+.tab-btn.active { color: var(--teal); background: var(--bg-s); }
+.tab-btn.active::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--teal);
+}
+
+/* ── Alertes énergie ─────────────────────────────────── */
+.alerte-normal   { color: var(--green); font-family: var(--mono); font-size: 10px; }
+.alerte-attention{ color: var(--yellow); font-family: var(--mono); font-size: 10px; font-weight: 700; }
+.alerte-critique { color: var(--red); font-family: var(--mono); font-size: 10px; font-weight: 700; }
+</style>
+
+
+<div class="page" id="page-intelligence">
+
+  <!-- ── Header ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title" style="font-size:22px;font-weight:700">🧠 Maintenance Prédictive</div>
+      <div class="page-sub">HSI · RUL · Radar de Risque · What-if Financier · Corrélations</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-outline" onclick="predictif.refresh()">🔄 Actualiser</button>
+      <button class="btn-accent" onclick="predictif.switchTab('rapport')">📄 Rapport Mensuel</button>
+    </div>
+  </div>
+
+  <!-- ── KPIs Prédictifs ── -->
+  <div class="kpi-grid">
+
+    <!-- HSI Moyen -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">SANTÉ MACHINES (HSI)</span>
+        <span class="kpi-status" id="pred-hsi-badge">—</span>
+      </div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="pred-hsi">—</div>
+        <div class="kpi-pct">/100</div>
+        <svg class="kpi-ring" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="32" stroke="#1a1f2e" stroke-width="6" fill="none"/>
+          <circle cx="40" cy="40" r="32" stroke="#0057b8" stroke-width="6" fill="none"
+            stroke-dasharray="201" stroke-dashoffset="100" stroke-linecap="round"
+            transform="rotate(-90 40 40)" id="ring-hsi"/>
+        </svg>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target">Objectif : 75+</div>
+        <div class="kpi-delta" id="pred-hsi-delta">—</div>
+      </div>
+      <div class="kpi-formula">Health Score Index — 0 à 100</div>
+    </div>
+
+    <!-- Alertes Agir -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">🔴 AGIR MAINTENANT</span>
+        <span class="kpi-status critical">URGENT</span>
+      </div>
+      <div class="kpi-main">
+        <div class="kpi-number red" id="pred-agir">—</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target" id="pred-planifier">🟠 — à planifier</div>
+        <div class="kpi-delta orange" id="pred-surveiller">🟡 — à surveiller</div>
+      </div>
+      <div class="kpi-formula">Composants en dérive critique</div>
+    </div>
+
+    <!-- Coût évité -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">COÛT ÉVITÉ POTENTIEL</span>
+        <span class="kpi-status ok">WHAT-IF</span>
+      </div>
+      <div class="kpi-main" style="flex-direction:column;align-items:flex-start">
+        <div class="kpi-number teal" id="pred-cout-evite" style="font-size:24px">—</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target">Si on agit maintenant</div>
+      </div>
+      <div class="kpi-formula">Coût panne − Coût préventif</div>
+    </div>
+
+    <!-- Taux fiabilité -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-name">FIABILITÉ PRÉDICTIONS</span>
+        <span class="kpi-status" id="pred-fiab-badge">—</span>
+      </div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="pred-fiabilite">—</div>
+        <div class="kpi-pct">%</div>
+      </div>
+      <div class="kpi-bottom">
+        <div class="kpi-target" id="pred-actives">— prédictions actives</div>
+      </div>
+      <div class="kpi-formula">Prédictions validées / total</div>
+    </div>
+
+  </div>
+
+  <!-- ── Ligne : Radar + Chronologie ── -->
+  <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px;margin-top:16px">
+
+    <!-- Radar de Risque -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">📡 Radar de Santé</div>
+          <div class="card-sub">Dérive par axe — prochaines 24h</div>
+        </div>
+        <select id="radar-composant" class="btn-outline" style="font-size:12px;padding:5px 10px"
+                onchange="predictif.updateRadar()">
+          <option value="">— Composant —</option>
+        </select>
+      </div>
+      <div style="position:relative;height:220px">
+        <canvas id="radar-chart"></canvas>
+      </div>
+      <div id="radar-interpretation" style="margin-top:10px;font-family:var(--mono);font-size:11px;
+           color:var(--text-m);padding:10px;background:var(--bg-e);border-radius:var(--r);line-height:1.6"></div>
+    </div>
+
+    <!-- Chronologie du Futur -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">⏳ Chronologie des Interventions</div>
+        <div class="card-sub">Prévisions basées sur RUL calculé</div>
+      </div>
+      <div id="chronologie-list" style="max-height:280px;overflow-y:auto">
+        <div style="text-align:center;padding:30px;color:var(--text-m);font-family:var(--mono);font-size:12px">
+          Aucune prédiction active
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Onglets ── -->
+  <div class="card" style="margin-top:16px;padding:0;overflow:hidden">
+
+    <div style="display:flex;background:var(--bg-e);border-bottom:1px solid var(--border)">
+      <button class="tab-btn active" onclick="predictif.switchTab('composants')" data-ptab="composants">🔩 Composants</button>
+      <button class="tab-btn" onclick="predictif.switchTab('mesure')" data-ptab="mesure">📥 Saisie Mesure</button>
+      <button class="tab-btn" onclick="predictif.switchTab('analyse')" data-ptab="analyse">📊 Analyse & Tendances</button>
+      <button class="tab-btn" onclick="predictif.switchTab('predictions')" data-ptab="predictions">🎯 Prédictions Actives</button>
+      <button class="tab-btn" onclick="predictif.switchTab('rapport')" data-ptab="rapport">📄 Rapport</button>
+    </div>
+
+    <!-- TAB : COMPOSANTS -->
+    <div id="ptab-composants" class="ptab" style="padding:24px;display:block">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px">ÉTAT DES COMPOSANTS</div>
+        <button class="btn-accent btn-sm" onclick="predictif.openAddComposant()">+ Ajouter</button>
+      </div>
+      <div id="composants-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"></div>
+    </div>
+
+    <!-- TAB : SAISIE MESURE -->
+    <div id="ptab-mesure" class="ptab" style="display:none;padding:24px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">SAISIE SIGNAUX FAIBLES</div>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Composant</label>
+            <select id="m-composant" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+              <option value="">— Sélectionner —</option>
+            </select>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">🌡️ Température (°C)</label>
+              <input type="number" id="m-temp" placeholder="Ex: 68" step="0.5"
+                style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="predictif.previewHSI()"/>
+            </div>
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">📳 Vibration (mm/s)</label>
+              <input type="number" id="m-vib" placeholder="Ex: 3.2" step="0.1"
+                style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="predictif.previewHSI()"/>
+            </div>
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">⚡ Courant (A)</label>
+              <input type="number" id="m-courant" placeholder="Ex: 12.5" step="0.1"
+                style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">🔇 Bruit (dB)</label>
+              <input type="number" id="m-bruit" placeholder="Ex: 72" step="1"
+                style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">⏱️ Micro-arrêts (min/j)</label>
+              <input type="number" id="m-micro" placeholder="Ex: 18" step="1"
+                style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="predictif.previewHSI()"/>
+            </div>
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">🧪 pH mesuré</label>
+              <input type="number" id="m-ph" placeholder="Ex: 4.3" step="0.01"
+                style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+            </div>
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">⚙️ Rendement (%)</label>
+              <input type="number" id="m-rendement" placeholder="Ex: 96.5" step="0.1"
+                style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"
+                oninput="predictif.previewHSI()"/>
+            </div>
+            <div class="form-group">
+              <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Shift</label>
+              <select id="m-shift" style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+                <option value="matin">Matin</option>
+                <option value="jour">Jour</option>
+                <option value="soir">Soir</option>
+                <option value="nuit">Nuit</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:8px">
+            <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Opérateur</label>
+            <input type="text" id="m-operateur" placeholder="Nom de l'opérateur"
+              style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+          </div>
+
+          <button class="btn-accent" style="width:100%;margin-top:12px" onclick="predictif.saisirMesure()">
+            🧠 Analyser et Enregistrer
+          </button>
+        </div>
+
+        <!-- Preview HSI -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">PRÉVISUALISATION HSI EN DIRECT</div>
+
+          <!-- Jauge HSI -->
+          <div style="position:relative;width:180px;height:180px;margin:0 auto 16px">
+            <svg viewBox="0 0 180 180" style="width:100%;height:100%">
+              <circle cx="90" cy="90" r="70" stroke="var(--bg-h)" stroke-width="14" fill="none"/>
+              <circle cx="90" cy="90" r="70" id="hsi-preview-ring"
+                stroke="var(--teal)" stroke-width="14" fill="none"
+                stroke-dasharray="440" stroke-dashoffset="220"
+                stroke-linecap="round" transform="rotate(-90 90 90)"
+                style="transition:all 0.5s ease"/>
+              <text x="90" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="32" font-weight="700" fill="var(--text)" id="hsi-preview-val">—</text>
+              <text x="90" y="102" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="var(--text-m)">HSI / 100</text>
+              <text x="90" y="122" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="var(--teal)" id="hsi-preview-label">Saisissez des valeurs</text>
+            </svg>
+          </div>
+
+          <!-- Niveaux référence -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">
+            <div style="text-align:center;padding:8px;background:rgba(26,138,74,.08);border-radius:var(--r);border:1px solid rgba(26,138,74,.2)">
+              <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">75+</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--green)">Normal</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:rgba(245,158,11,.08);border-radius:var(--r);border:1px solid rgba(245,158,11,.2)">
+              <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--yellow)">55-74</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--yellow)">Surveiller</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:rgba(234,108,0,.08);border-radius:var(--r);border:1px solid rgba(234,108,0,.2)">
+              <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--orange)">35-54</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--orange)">Planifier</div>
+            </div>
+            <div style="text-align:center;padding:8px;background:rgba(217,48,37,.08);border-radius:var(--r);border:1px solid rgba(217,48,37,.2)">
+              <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red)">0-34</div>
+              <div style="font-family:var(--mono);font-size:9px;color:var(--red)">Agir !</div>
+            </div>
+          </div>
+
+          <!-- Message prédiction -->
+          <div id="mesure-prediction-result" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : ANALYSE -->
+    <div id="ptab-analyse" class="ptab" style="display:none;padding:24px">
+      <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+        <select id="analyse-composant" style="padding:9px 14px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+          <option value="">— Sélectionner un composant —</option>
+        </select>
+        <button class="btn-accent" onclick="predictif.analyserComposant()">📊 Analyser</button>
+      </div>
+      <div id="analyse-result">
+        <div style="text-align:center;padding:40px;color:var(--text-m);font-family:var(--mono);font-size:12px">
+          Sélectionnez un composant et cliquez Analyser
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : PRÉDICTIONS -->
+    <div id="ptab-predictions" class="ptab" style="display:none;padding:24px">
+      <div id="predictions-list">
+        <div style="text-align:center;padding:40px;color:var(--text-m);font-family:var(--mono);font-size:12px">
+          Aucune prédiction active
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : RAPPORT -->
+    <div id="ptab-rapport" class="ptab" style="display:none;padding:24px">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px">
+        <select id="rapp-mois" style="padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px">
+          <option value="1">Janvier</option><option value="2">Février</option>
+          <option value="3">Mars</option><option value="4">Avril</option>
+          <option value="5">Mai</option><option value="6">Juin</option>
+          <option value="7">Juillet</option><option value="8">Août</option>
+          <option value="9">Septembre</option><option value="10">Octobre</option>
+          <option value="11">Novembre</option><option value="12">Décembre</option>
+        </select>
+        <input type="number" id="rapp-annee" value="2026"
+          style="padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px;width:80px"/>
+        <button class="btn-accent" onclick="predictif.genererRapport()">📄 Générer</button>
+        <button class="btn-outline" onclick="predictif.exporterRapport()">⬇️ Exporter</button>
+      </div>
+      <div id="rapport-result"></div>
+    </div>
+
+  </div>
+
+  <!-- Modal ajout composant -->
+  <div id="modal-composant" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--bg-s);border-radius:var(--rl);width:100%;max-width:500px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border)">
+        <div style="font-family:var(--font);font-size:16px;font-weight:700">🔩 Nouveau Composant</div>
+        <button onclick="document.getElementById('modal-composant').style.display='none'"
+          style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-m)">✕</button>
+      </div>
+      <div style="padding:22px;display:grid;gap:12px">
+        <div class="form-group">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Nom du composant</label>
+          <input type="text" id="nc-nom" placeholder="Ex: Pompe à lait principale"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-group">
+            <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Type</label>
+            <select id="nc-type" style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px">
+              <option value="moteur">Moteur</option>
+              <option value="pompe">Pompe</option>
+              <option value="capteur">Capteur</option>
+              <option value="vanne">Vanne</option>
+              <option value="echangeur">Échangeur</option>
+              <option value="compresseur">Compresseur</option>
+              <option value="convoyeur">Convoyeur</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Criticité (1-5)</label>
+            <input type="number" id="nc-criticite" value="3" min="1" max="5"
+              style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+          </div>
+          <div class="form-group">
+            <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Durée de vie (heures)</label>
+            <input type="number" id="nc-duree" placeholder="Ex: 8760"
+              style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+          </div>
+          <div class="form-group">
+            <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Coût remplacement (DZD)</label>
+            <input type="number" id="nc-cout" placeholder="Ex: 185000"
+              style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px"/>
+          </div>
+        </div>
+        <button class="btn-accent" style="width:100%" onclick="predictif.sauvegarderComposant()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.ptab { display: none; }
+.ptab-active { display: block; }
+
+/* Composant card */
+.composant-card {
+  background: var(--bg-s);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 18px;
+  border-left: 4px solid var(--teal);
+  transition: all 0.18s;
+  cursor: pointer;
+}
+.composant-card:hover { border-color: var(--teal); box-shadow: 0 4px 16px var(--teal-glow); }
+.composant-card.alerte-agir      { border-left-color: var(--red); }
+.composant-card.alerte-planifier { border-left-color: var(--orange); }
+.composant-card.alerte-surveiller{ border-left-color: var(--yellow); }
+
+/* Barre usure */
+.usure-bar { height: 5px; background: var(--bg-h); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.usure-fill{ height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+/* Prédiction card */
+.pred-card {
+  background: var(--bg-s);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 18px;
+  margin-bottom: 12px;
+  border-left: 4px solid;
+}
+.pred-card.agir      { border-left-color: var(--red);    background: rgba(217,48,37,.03); }
+.pred-card.planifier { border-left-color: var(--orange);  background: rgba(234,108,0,.03); }
+.pred-card.surveiller{ border-left-color: var(--yellow);  background: rgba(245,158,11,.03); }
+
+/* Chronologie */
+.chron-item {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.chron-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+</style>
+<!-- =============================================================
+     TWINOVA — MODULE 6 : BENCHMARKING SECTORIEL
+     Remplacer tout le bloc <div class="page" id="page-benchmark">
+     dans index.html par ce code
+     ============================================================= -->
+
+<div class="page" id="page-benchmark">
+
+  <!-- ── Header ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title" style="font-size:22px;font-weight:700">📊 Benchmarking Sectoriel</div>
+      <div class="page-sub">Positionnement anonyme · SPI · Quartiles · Évolution · Alertes déclassement</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <select id="bench-secteur"
+        style="padding:9px 14px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px;color:var(--text)">
+        <option value="Laiterie">🥛 Laiterie</option>
+        <option value="Boulangerie">🍞 Boulangerie</option>
+        <option value="Conserverie">🥫 Conserverie</option>
+        <option value="Fromagerie">🧀 Fromagerie</option>
+      </select>
+      <button type="button" class="btn-outline" onclick="benchmark.soumettre()">
+        📤 Soumettre mes données
+      </button>
+      <button type="button" class="btn-accent" onclick="benchmark.charger()">
+        🔄 Analyser
+      </button>
+    </div>
+  </div>
+
+  <!-- ── KPIs SPI ── -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">SCORE SPI GLOBAL</span><span class="kpi-status" id="bench-spi-badge">—</span></div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="bench-spi" style="font-size:38px">—</div>
+      </div>
+      <div class="kpi-bottom"><div class="kpi-target">100 = Moyenne secteur</div></div>
+      <div class="kpi-formula">Score de Performance Sectoriel</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">RANG TRS</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="bench-rang-trs" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-rang-trs-label">vs secteur</div></div>
+      <div class="kpi-formula">TRS vs secteur</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">RANG ÉNERGIE</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="bench-rang-epi" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-rang-epi-label">EPI vs secteur</div></div>
+      <div class="kpi-formula">kWh/unité comparé</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">RANG QUALITÉ</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="bench-rang-qualite" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-rang-qualite-label">Qualité vs secteur</div></div>
+      <div class="kpi-formula">% conformité produit</div>
+    </div>
+
+    <div class="kpi-card" style="border-top-color:gold">
+      <div class="kpi-top"><span class="kpi-name">ENTREPRISES</span></div>
+      <div class="kpi-main"><div class="kpi-number" style="font-size:32px">🏭</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-nb-ent">— entreprises</div></div>
+      <div class="kpi-formula">Pool anonyme actif</div>
+    </div>
+
+  </div>
+
+  <!-- ── Poids personnalisés ── -->
+  <div class="card" style="margin-top:16px;padding:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px">⚖️ PONDÉRATION PERSONNALISÉE DU SPI</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-m);margin-top:3px">Ajustez les poids selon les priorités de votre entreprise (total = 100)</div>
+      </div>
+      <button type="button" class="btn-outline" onclick="benchmark.charger()" style="font-size:12px;padding:6px 14px">
+        Recalculer →
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">TRS</label>
+        <input type="number" id="poids-trs" value="30" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:var(--teal)"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Qualité</label>
+        <input type="number" id="poids-qualite" value="25" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:var(--green)"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Énergie</label>
+        <input type="number" id="poids-energie" value="20" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:#f59e0b"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Rendement</label>
+        <input type="number" id="poids-rendement" value="15" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:#8b5cf6"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Sécurité</label>
+        <input type="number" id="poids-securite" value="10" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:var(--red)"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Radar + Quartiles ── -->
+  <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;margin-top:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🕸️ Radar de Positionnement</div>
+          <div class="card-sub">Vous (bleu) vs Moyenne secteur (gris) vs Top 10% (vert)</div>
+        </div>
+      </div>
+      <div style="position:relative;height:280px">
+        <canvas id="bench-radar"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📈 Distribution Sectorielle (Quartiles)</div>
+        <div class="card-sub">Votre position dans la distribution du secteur</div>
+      </div>
+      <div id="bench-quartiles-list" style="display:flex;flex-direction:column;gap:14px;padding:4px 0"></div>
+    </div>
+
+  </div>
+
+  <!-- ── Classement + Évolution ── -->
+  <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;margin-top:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏆 Classement Anonyme</div>
+        <div class="card-sub" id="bench-nb-ent-sub">Pool sectoriel actif</div>
+      </div>
+      <div id="bench-classement"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📉 Évolution vs Secteur</div>
+        <div class="card-sub">Votre TRS vs moyenne sectorielle — 12 derniers mois</div>
+      </div>
+      <div style="position:relative;height:200px">
+        <canvas id="bench-evolution"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Alertes déclassement ── -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <div class="card-title">🚨 Alertes de Déclassement</div>
+      <div class="card-sub">TWINOVA surveille votre position et vous alerte en cas de recul</div>
+    </div>
+    <div id="bench-alertes" style="padding:4px 0">
+      <div style="text-align:center;padding:20px;font-family:var(--mono);font-size:12px;color:var(--text-m)">
+        Cliquez sur "Analyser" pour voir vos alertes
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Recommandations Peer-to-Peer ── -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <div class="card-title">💡 Recommandations Peer-to-Peer</div>
+      <div class="card-sub">Basées sur les pratiques des top performeurs de votre secteur</div>
+    </div>
+    <div id="bench-recommandations"
+      style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:4px 0">
+      <div style="grid-column:span 3;text-align:center;padding:30px;
+                  font-family:var(--mono);font-size:12px;color:var(--text-m)">
+        Cliquez sur "Analyser" pour voir vos recommandations
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Certificat ── -->
+  <div id="bench-certificat-section" style="display:none;margin-top:16px">
+    <div class="card" style="text-align:center;padding:30px;background:linear-gradient(135deg,#fffbea,#fff9e6);border:2px solid gold">
+      <div style="font-size:48px;margin-bottom:12px" id="cert-emoji">🥇</div>
+      <div style="font-size:22px;font-weight:700;color:#b8860b;margin-bottom:6px" id="cert-titre">—</div>
+      <div style="font-family:var(--mono);font-size:12px;color:#92400e;margin-bottom:16px" id="cert-details">—</div>
+      <div style="display:inline-block;background:#b8860b;color:#fff;padding:8px 20px;
+                  border-radius:var(--r);font-family:var(--mono);font-size:11px;letter-spacing:1px;margin-bottom:16px">
+        CERTIFIÉ PAR TWINOVA — DIGITAL MODEL INDUSTRIEL
+      </div>
+      <br>
+      <button type="button" class="btn-accent" onclick="benchmark.exporterCertificat()">
+        ⬇️ Télécharger le Certificat PDF
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — SOUMETTRE MES DONNÉES
+     ══════════════════════════════════════════════════════════ -->
+<div id="bench-modal-soumettre"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
+         z-index:1000;align-items:center;justify-content:center;padding:20px"
+  onclick="if(event.target===this) benchmark.fermerModal()">
+  <div style="background:var(--bg-s);border:1px solid var(--border);border-radius:var(--rl);
+              width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;
+                padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:17px;font-weight:700">📤 Soumettre mes données au pool</div>
+      <button type="button" onclick="benchmark.fermerModal()"
+        style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-m);padding:4px 8px">✕</button>
+    </div>
+
+    <div style="padding:24px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--teal);
+                  background:var(--teal-dim);border:1px solid var(--teal);
+                  border-radius:var(--r);padding:12px;margin-bottom:20px;line-height:1.6">
+        🔒 <strong>Anonymat garanti</strong> — Vos données sont soumises de façon anonyme.<br>
+        Aucune entreprise ne verra votre nom dans le classement.
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">TRS Moyen (%)</label>
+          <input type="number" id="sub-trs" placeholder="Ex: 65" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Qualité (%)</label>
+          <input type="number" id="sub-qualite" placeholder="Ex: 88" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Énergie (kWh/unité)</label>
+          <input type="number" id="sub-energie" placeholder="Ex: 0.21" step="0.01"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Rendement matière (%)</label>
+          <input type="number" id="sub-rendement" placeholder="Ex: 86" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div style="grid-column:span 2">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Sécurité sanitaire (%)</label>
+          <input type="number" id="sub-securite" placeholder="Ex: 78" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:20px">
+        <button type="button" class="btn-outline" onclick="benchmark.fermerModal()"
+          style="flex:1;padding:12px">Annuler</button>
+        <button type="button" id="bench-submit-confirm" class="btn-accent"
+          onclick="benchmark.confirmerSoumission()" style="flex:2;padding:12px">
+          Confirmer la soumission →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     STYLES CSS — À ajouter dans style.css
+     ══════════════════════════════════════════════════════════ -->
+<style>
+/* Rangs */
+.rang-top    { color: gold;           font-weight: 700; }
+.rang-bon    { color: var(--green);   font-weight: 700; }
+.rang-moyen  { color: var(--yellow);  font-weight: 600; }
+.rang-faible { color: var(--text-m);  font-weight: 400; }
+
+/* Barre quartile */
+.quartile-bar-container {
+  position: relative; height: 16px;
+  background: var(--bg-h); border-radius: 8px;
+  overflow: visible; margin: 4px 0;
+}
+.quartile-zone {
+  position: absolute; height: 100%; border-radius: 8px;
+}
+.quartile-marker {
+  position: absolute; top: -4px;
+  width: 10px; height: 24px;
+  border-radius: 5px; transform: translateX(-50%);
+  z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.quartile-label {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--text-d); margin-top: 3px;
+}
+</style>
+<div class="page" id="page-greenfield">
+
+  <!-- ── Header ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title" style="font-size:22px;font-weight:700">🏗️ Simulation Greenfield</div>
+      <div class="page-sub">Laboratoire de Projet · Configurer · Simuler · Générer Business Plan</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button type="button" class="btn-outline" onclick="greenfield.nouveauProjet()">+ Nouveau Projet</button>
+      <button type="button" class="btn-accent" onclick="greenfield.simuler()">🚀 Lancer la Simulation</button>
+    </div>
+  </div>
+
+  <!-- ── KPIs résultats ── -->
+  <div class="kpi-grid" id="gf-kpi-grid" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">ROI ANNUEL</span><span class="kpi-status" id="gf-roi-badge">—</span></div>
+      <div class="kpi-main"><div class="kpi-number teal" id="gf-roi" style="font-size:32px">—</div><div class="kpi-pct">%</div></div>
+      <div class="kpi-bottom"><div class="kpi-target">Retour sur investissement</div></div>
+      <div class="kpi-formula">Bénéfice net / Investissement</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">PAYBACK</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-payback" style="font-size:32px">—</div><div class="kpi-pct" style="font-size:14px">mois</div></div>
+      <div class="kpi-bottom"><div class="kpi-target">Retour investissement</div></div>
+      <div class="kpi-formula">Invest / Bénéfice mensuel</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">CA MENSUEL</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-ca" style="font-size:24px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target">DZD / mois</div></div>
+      <div class="kpi-formula">Production × Prix vente</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">VAN 5 ANS</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-van" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="gf-van-label">Valeur actuelle nette</div></div>
+      <div class="kpi-formula">Taux actualisation 12%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">SURFACE USINE</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="gf-surface" style="font-size:28px">—</div><div class="kpi-pct" style="font-size:14px">m²</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="gf-operateurs">— opérateurs</div></div>
+      <div class="kpi-formula">Machines + Circulation + Stock</div>
+    </div>
+  </div>
+
+  <!-- ── Corps principal ── -->
+  <div style="display:grid;grid-template-columns:320px 1fr;gap:16px;margin-top:16px">
+
+    <!-- ── Panneau gauche : Paramètres ── -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Paramètres projet -->
+      <div class="card" style="padding:18px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:14px">📋 PARAMÈTRES PROJET</div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Nom du projet</label>
+          <input type="text" id="gf-nom" placeholder="Ex: Laiterie El Baraka"
+            style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px"/>
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Secteur</label>
+          <select id="gf-secteur" onchange="greenfield.filtrerMachines()"
+            style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px">
+            <option value="Laiterie">🥛 Laiterie</option>
+            <option value="Boulangerie">🍞 Boulangerie</option>
+            <option value="Conserverie">🥫 Conserverie</option>
+            <option value="Fromagerie">🧀 Fromagerie</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Localisation</label>
+          <select id="gf-localisation"
+            style="width:100%;padding:9px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px">
+            <option value="Alger">Alger (7.5 DZD/kWh)</option>
+            <option value="Oran">Oran (7.5 DZD/kWh)</option>
+            <option value="Constantine">Constantine (7.2 DZD/kWh)</option>
+            <option value="Annaba">Annaba (7.2 DZD/kWh)</option>
+            <option value="Setif">Sétif (7.0 DZD/kWh)</option>
+          </select>
+        </div>
+
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin:14px 0 10px">📊 VARIABLES DE MARCHÉ</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Prix vente (DZD/kg)</label>
+            <input type="number" id="gf-prix-vente" placeholder="250" value="250"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Coût MP (DZD/kg)</label>
+            <input type="number" id="gf-cout-mp" placeholder="80" value="80"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Main d'œuvre (DZD/m)</label>
+            <input type="number" id="gf-mdo" placeholder="500000" value="500000"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Loyer/m (DZD)</label>
+            <input type="number" id="gf-loyer" placeholder="150000" value="150000"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"
+              oninput="greenfield.previewRapide()"/>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Production cible (kg/jour)</label>
+          <input type="number" id="gf-prod-cible" placeholder="1000" value="1000"
+            style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px;margin-top:4px"
+            oninput="greenfield.previewRapide()"/>
+        </div>
+
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin:14px 0 10px">🏦 FINANCEMENT</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Apport propre (%)</label>
+            <input type="number" id="gf-apport" value="30" min="0" max="100"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Taux intérêt (%)</label>
+            <input type="number" id="gf-taux" value="6" step="0.5"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:13px"/>
+          </div>
+          <div style="grid-column:span 2">
+            <label style="font-family:var(--mono);font-size:9px;color:var(--text-m)">Durée crédit (ans)</label>
+            <select id="gf-duree"
+              style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:13px;margin-top:4px">
+              <option value="3">3 ans</option>
+              <option value="5" selected>5 ans</option>
+              <option value="7">7 ans</option>
+              <option value="10">10 ans</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Preview rapide marge -->
+        <div id="gf-preview-marge" style="display:none;margin-top:12px;padding:10px;background:var(--teal-dim);border:1px solid var(--teal);border-radius:var(--r)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:1px;margin-bottom:6px">MARGE UNITAIRE</div>
+          <div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text)" id="gf-marge-val">—</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-m);margin-top:2px" id="gf-marge-pct">—</div>
+        </div>
+      </div>
+
+      <!-- Ligne sélectionnée résumé -->
+      <div class="card" style="padding:18px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">🏭 LIGNE CONFIGURÉE</div>
+        <div id="gf-ligne-resume" style="font-family:var(--mono);font-size:11px;color:var(--text-m)">
+          Glissez des machines dans le configurateur →
+        </div>
+        <div id="gf-invest-total" style="display:none;margin-top:12px;padding:10px;background:rgba(217,48,37,.06);border:1px solid rgba(217,48,37,.2);border-radius:var(--r)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--red)">INVESTISSEMENT MACHINES</div>
+          <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--red)" id="gf-invest-val">—</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text-m)">DZD (hors génie civil)</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Panneau droit : Configurateur + Résultats ── -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Onglets -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="display:flex;background:var(--bg-e);border-bottom:1px solid var(--border)">
+          <button type="button" class="tab-btn active" onclick="greenfield.switchTab('configurateur')" data-gftab="configurateur">🏗️ Configurateur</button>
+          <button type="button" class="tab-btn" onclick="greenfield.switchTab('resultats')" data-gftab="resultats">📊 Résultats</button>
+          <button type="button" class="tab-btn" onclick="greenfield.switchTab('plan3ans')" data-gftab="plan3ans">📈 Plan 3 ans</button>
+          <button type="button" class="tab-btn" onclick="greenfield.switchTab('dimensionnement')" data-gftab="dimensionnement">📐 Dimensionnement</button>
+        </div>
+
+        <!-- TAB : CONFIGURATEUR DRAG & DROP -->
+        <div id="gftab-configurateur" class="gftab" style="padding:20px;display:block">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+            <!-- Bibliothèque machines -->
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">
+                📦 BIBLIOTHÈQUE DE MACHINES
+                <select id="gf-filtre-cat" onchange="greenfield.filtrerMachines()"
+                  style="margin-left:10px;padding:4px 8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:11px">
+                  <option value="">Toutes catégories</option>
+                  <option value="reception">🏗️ Réception</option>
+                  <option value="transformation">⚙️ Transformation</option>
+                  <option value="conditionnement">📦 Conditionnement</option>
+                  <option value="stockage">❄️ Stockage</option>
+                  <option value="utilites">💨 Utilités</option>
+                </select>
+              </div>
+              <div id="gf-bibliotheque" style="display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto">
+                <div style="color:var(--text-m);font-family:var(--mono);font-size:11px;padding:20px;text-align:center">Chargement...</div>
+              </div>
+            </div>
+
+            <!-- Zone de drop : Ligne de production -->
+            <div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px;margin-bottom:12px">
+                🏭 VOTRE LIGNE DE PRODUCTION
+                <button type="button" onclick="greenfield.viderLigne()"
+                  style="margin-left:10px;padding:3px 8px;background:transparent;border:1px solid var(--border-b);border-radius:var(--r);color:var(--text-m);font-size:10px;cursor:pointer">
+                  🗑 Vider
+                </button>
+              </div>
+              <div id="gf-drop-zone"
+                ondragover="event.preventDefault();this.style.background='var(--teal-dim)'"
+                ondragleave="this.style.background=''"
+                ondrop="greenfield.drop(event)"
+                style="min-height:360px;background:var(--bg-e);border:2px dashed var(--border-b);border-radius:var(--rl);padding:12px;display:flex;flex-direction:column;gap:8px;transition:background 0.2s">
+                <div id="gf-drop-hint" style="color:var(--text-d);font-family:var(--mono);font-size:11px;text-align:center;padding:40px 0">
+                  👈 Glissez des machines ici<br>pour construire votre ligne
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB : RÉSULTATS FINANCIERS -->
+        <div id="gftab-resultats" class="gftab" style="display:none;padding:20px">
+          <div id="gf-resultats-content">
+            <div style="text-align:center;padding:40px;color:var(--text-m);font-family:var(--mono);font-size:12px">
+              Configurez votre ligne et lancez une simulation 🚀
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB : PLAN 3 ANS -->
+        <div id="gftab-plan3ans" class="gftab" style="display:none;padding:20px">
+          <canvas id="gf-chart-3ans" height="300"></canvas>
+          <div id="gf-plan-table" style="margin-top:16px"></div>
+        </div>
+
+        <!-- TAB : DIMENSIONNEMENT -->
+        <div id="gftab-dimensionnement" class="gftab" style="display:none;padding:20px">
+          <div id="gf-dimensionnement-content">
+            <div style="text-align:center;padding:40px;color:var(--text-m);font-family:var(--mono);font-size:12px">
+              Lancez une simulation pour voir le dimensionnement
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bouton Business Plan -->
+      <div class="card" style="padding:18px;background:linear-gradient(135deg,var(--bg-e),var(--bg-s));border:1px solid var(--teal)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:700;font-size:15px">📄 Business Plan Complet</div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--text-m);margin-top:4px">
+              Dossier technique et financier · Prêt pour les banques et investisseurs
+            </div>
+          </div>
+          <button type="button" class="btn-accent" onclick="greenfield.exporterBusinessPlan()" style="white-space:nowrap">
+            ⬇️ Générer le Business Plan
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.gftab { display: none; }
+.gftab-active { display: block; }
+
+/* Carte machine bibliothèque */
+.gf-machine-card {
+  display: flex; align-items: center; gap:10px;
+  background: var(--bg-e); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 10px 12px;
+  cursor: grab; transition: all 0.18s;
+  user-select: none;
+}
+.gf-machine-card:hover { border-color: var(--teal); transform: translateX(2px); box-shadow: 0 2px 10px var(--teal-glow); }
+.gf-machine-card:active { cursor: grabbing; opacity: 0.8; }
+.gf-machine-icon { font-size: 20px; flex-shrink: 0; }
+.gf-machine-info { flex: 1; min-width: 0; }
+.gf-machine-nom { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gf-machine-prix { font-family: var(--mono); font-size: 10px; color: var(--teal); }
+.gf-machine-add { background: none; border: 1px solid var(--border-b); border-radius: var(--r); padding: 3px 8px; cursor: pointer; font-size: 12px; color: var(--text-m); transition: all 0.18s; }
+.gf-machine-add:hover { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+/* Carte machine dans la ligne */
+.gf-ligne-machine {
+  display: flex; align-items: center; gap:10px;
+  background: var(--bg-s); border: 1px solid var(--teal);
+  border-left: 3px solid var(--teal);
+  border-radius: var(--r); padding: 8px 12px;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+.gf-ligne-machine .gf-remove { background: none; border: none; color: var(--red); cursor: pointer; font-size: 14px; margin-left: auto; padding: 2px 6px; }
+.gf-ligne-machine .gf-remove:hover { background: rgba(217,48,37,.1); border-radius: 4px; }
+
+/* Catégorie badge */
+.cat-badge {
+  font-family: var(--mono); font-size: 9px; padding: 1px 6px;
+  border-radius: 4px; font-weight: 600;
+}
+.cat-reception     { background: rgba(0,87,184,.1); color: #0057b8; }
+.cat-transformation{ background: rgba(245,158,11,.1); color: var(--yellow); }
+.cat-conditionnement{ background: rgba(26,138,74,.1); color: var(--green); }
+.cat-stockage      { background: rgba(0,255,209,.1); color: var(--teal); }
+.cat-utilites      { background: rgba(107,70,193,.1); color: #6b46c1; }
+
+/* Flèche entre machines */
+.gf-arrow { text-align: center; color: var(--teal); font-size: 14px; margin: -4px 0; }
+</style>
+  </main>
+<script src="app.js"></script>
+<script src="benchmark_app.js"></script>
+<script src="visualisation3d_app.js"></script>
+<!-- =============================================================
+     TWINOVA — MODULE 3 HACCP & SÉCURITÉ SANITAIRE
+     Section à insérer dans index.html juste avant </main> ou
+     à la suite des autres sections de page
+     ============================================================= -->
+
+<!-- ── NAV ITEM à ajouter dans la sidebar ── -->
+<!--
+<a href="#" class="nav-item" data-page="haccp">
+    🛡️ HACCP & Sécurité
+</a>
+-->
+
+<!-- ════════════════════════════════════════════════════════════
+     PAGE HACCP
+     ═══════════════════════════════════════════════════════════ -->
+<script src="twiny_app.js"></script>
+</body>
+</html>

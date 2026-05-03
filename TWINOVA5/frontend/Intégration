@@ -1,0 +1,93 @@
+"""
+=============================================================
+TWINOVA MODULE 3 — GUIDE D'INTÉGRATION RAPIDE
+=============================================================
+
+1. COPIER les 4 fichiers dans votre projet TWINOVA5 :
+   haccp_models.py  → C:\Users\PCSTAR\Desktop\TWINOVA5\backend\
+   haccp_routes.py  → C:\Users\PCSTAR\Desktop\TWINOVA5\backend\
+   haccp_section.html → contenu à coller dans index.html
+   haccp_app.js       → contenu à coller dans App.js
+
+2. MODIFIER backend/database.py — ajouter à la fin :
+─────────────────────────────────────────────────────
+from haccp_models import (
+    PlanHACCP, SeuilCritique, ControleHACCP,
+    AlerteHACCP, StatutSanitaireLot,
+    NiveauGravite, StatutLotHACCP, TypeParametreHACCP,
+    seed_haccp_demo
+)
+
+# Les modèles sont automatiquement enregistrés via Base.metadata.create_all
+─────────────────────────────────────────────────────
+
+3. MODIFIER backend/main.py — ajouter ces lignes :
+─────────────────────────────────────────────────────
+# En haut du fichier, après les imports existants :
+from haccp_models import (
+    PlanHACCP, SeuilCritique, ControleHACCP,
+    AlerteHACCP, StatutSanitaireLot,
+    NiveauGravite, StatutLotHACCP, TypeParametreHACCP,
+    seed_haccp_demo
+)
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import math
+
+# Copier TOUT le contenu de haccp_routes.py (les fonctions et routes)
+# puis à la fin de main.py, enregistrer le router :
+app.include_router(router_haccp)
+
+# Dans la fonction de démarrage (startup/create_tables), ajouter :
+# db = SessionLocal()
+# seed_haccp_demo(db)
+# db.close()
+─────────────────────────────────────────────────────
+
+4. MODIFIER frontend/index.html :
+   - Coller le contenu de haccp_section.html juste avant </main>
+   - Ajouter dans la sidebar :
+     <li class="nav-item" onclick="navigateTo('haccp')">
+       <span class="nav-icon">🛡️</span>
+       <span class="nav-text">HACCP & Sécurité</span>
+     </li>
+
+5. MODIFIER frontend/App.js :
+   - Coller le contenu de haccp_app.js à la fin
+   - Dans la fonction navigateTo(), ajouter :
+     case 'haccp':
+         document.getElementById('page-haccp').style.display = 'block';
+         haccp.init();
+         break;
+
+6. VARIABLES D'ENVIRONNEMENT (optionnel — pour vrais emails) :
+   Créer un fichier .env dans backend/ :
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=votre@gmail.com
+   SMTP_PASS=votre_mot_de_passe_app
+   SMTP_FROM=TWINOVA <votre@gmail.com>
+
+   Sans ces variables, les alertes critiques sont simulées
+   (affichées dans le terminal/logs).
+
+=============================================================
+FONCTIONNALITÉS MODULE 3 LIVRÉES :
+✅ Plans HACCP digitalisés (seuils min/max par CCP)
+✅ Saisie terrain avec preview conformité temps réel
+✅ Calcul automatique conformité + écart
+✅ Alertes CRITIQUE / MINEURE avec popup visuel
+✅ Email automatique au Responsable Qualité (si SMTP configuré)
+✅ Blocage visuel lot rouge "BLOQUÉ NON CONFORME" animé
+✅ Bouton Libérer le Lot (vert, activé UNIQUEMENT si 100% conforme)
+✅ Indice de Conformité Sanitaire = (conformes/total) × 100
+✅ Temps d'Exposition au Risque (minutes hors zone)
+✅ Valeur Pasteurisatrice VP (modèle Bigelow) avec graphique
+✅ Cinétique pH fermentation (modèle logistique) avec graphique
+✅ Dashboard KPIs sanitaires (indice global, lots bloqués/libérés)
+✅ Historique contrôles par lot
+✅ Système acquittement alertes
+✅ Données de démonstration (2 plans, 5 seuils)
+=============================================================
+"""

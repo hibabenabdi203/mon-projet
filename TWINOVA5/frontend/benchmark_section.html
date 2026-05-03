@@ -1,0 +1,309 @@
+<!-- =============================================================
+     TWINOVA — MODULE 6 : BENCHMARKING SECTORIEL
+     Remplacer tout le bloc <div class="page" id="page-benchmark">
+     dans index.html par ce code
+     ============================================================= -->
+
+<div class="page" id="page-benchmark">
+
+  <!-- ── Header ── -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div>
+      <div class="page-title" style="font-size:22px;font-weight:700">📊 Benchmarking Sectoriel</div>
+      <div class="page-sub">Positionnement anonyme · SPI · Quartiles · Évolution · Alertes déclassement</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <select id="bench-secteur"
+        style="padding:9px 14px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--font);font-size:14px;color:var(--text)">
+        <option value="Laiterie">🥛 Laiterie</option>
+        <option value="Boulangerie">🍞 Boulangerie</option>
+        <option value="Conserverie">🥫 Conserverie</option>
+        <option value="Fromagerie">🧀 Fromagerie</option>
+      </select>
+      <button type="button" class="btn-outline" onclick="benchmark.soumettre()">
+        📤 Soumettre mes données
+      </button>
+      <button type="button" class="btn-accent" onclick="benchmark.charger()">
+        🔄 Analyser
+      </button>
+    </div>
+  </div>
+
+  <!-- ── KPIs SPI ── -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">SCORE SPI GLOBAL</span><span class="kpi-status" id="bench-spi-badge">—</span></div>
+      <div class="kpi-main">
+        <div class="kpi-number" id="bench-spi" style="font-size:38px">—</div>
+      </div>
+      <div class="kpi-bottom"><div class="kpi-target">100 = Moyenne secteur</div></div>
+      <div class="kpi-formula">Score de Performance Sectoriel</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">RANG TRS</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="bench-rang-trs" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-rang-trs-label">vs secteur</div></div>
+      <div class="kpi-formula">TRS vs secteur</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">RANG ÉNERGIE</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="bench-rang-epi" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-rang-epi-label">EPI vs secteur</div></div>
+      <div class="kpi-formula">kWh/unité comparé</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-name">RANG QUALITÉ</span></div>
+      <div class="kpi-main"><div class="kpi-number" id="bench-rang-qualite" style="font-size:22px">—</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-rang-qualite-label">Qualité vs secteur</div></div>
+      <div class="kpi-formula">% conformité produit</div>
+    </div>
+
+    <div class="kpi-card" style="border-top-color:gold">
+      <div class="kpi-top"><span class="kpi-name">ENTREPRISES</span></div>
+      <div class="kpi-main"><div class="kpi-number" style="font-size:32px">🏭</div></div>
+      <div class="kpi-bottom"><div class="kpi-target" id="bench-nb-ent">— entreprises</div></div>
+      <div class="kpi-formula">Pool anonyme actif</div>
+    </div>
+
+  </div>
+
+  <!-- ── Poids personnalisés ── -->
+  <div class="card" style="margin-top:16px;padding:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.5px">⚖️ PONDÉRATION PERSONNALISÉE DU SPI</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-m);margin-top:3px">Ajustez les poids selon les priorités de votre entreprise (total = 100)</div>
+      </div>
+      <button type="button" class="btn-outline" onclick="benchmark.charger()" style="font-size:12px;padding:6px 14px">
+        Recalculer →
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">TRS</label>
+        <input type="number" id="poids-trs" value="30" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:var(--teal)"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Qualité</label>
+        <input type="number" id="poids-qualite" value="25" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:var(--green)"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Énergie</label>
+        <input type="number" id="poids-energie" value="20" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:#f59e0b"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Rendement</label>
+        <input type="number" id="poids-rendement" value="15" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:#8b5cf6"/>
+      </div>
+      <div style="text-align:center">
+        <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Sécurité</label>
+        <input type="number" id="poids-securite" value="10" min="0" max="100"
+          style="width:100%;padding:8px;background:var(--bg-e);border:1px solid var(--border-b);border-radius:var(--r);font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;color:var(--red)"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Radar + Quartiles ── -->
+  <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;margin-top:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">🕸️ Radar de Positionnement</div>
+          <div class="card-sub">Vous (bleu) vs Moyenne secteur (gris) vs Top 10% (vert)</div>
+        </div>
+      </div>
+      <div style="position:relative;height:280px">
+        <canvas id="bench-radar"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📈 Distribution Sectorielle (Quartiles)</div>
+        <div class="card-sub">Votre position dans la distribution du secteur</div>
+      </div>
+      <div id="bench-quartiles-list" style="display:flex;flex-direction:column;gap:14px;padding:4px 0"></div>
+    </div>
+
+  </div>
+
+  <!-- ── Classement + Évolution ── -->
+  <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:16px;margin-top:16px">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏆 Classement Anonyme</div>
+        <div class="card-sub" id="bench-nb-ent-sub">Pool sectoriel actif</div>
+      </div>
+      <div id="bench-classement"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📉 Évolution vs Secteur</div>
+        <div class="card-sub">Votre TRS vs moyenne sectorielle — 12 derniers mois</div>
+      </div>
+      <div style="position:relative;height:200px">
+        <canvas id="bench-evolution"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Alertes déclassement ── -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <div class="card-title">🚨 Alertes de Déclassement</div>
+      <div class="card-sub">TWINOVA surveille votre position et vous alerte en cas de recul</div>
+    </div>
+    <div id="bench-alertes" style="padding:4px 0">
+      <div style="text-align:center;padding:20px;font-family:var(--mono);font-size:12px;color:var(--text-m)">
+        Cliquez sur "Analyser" pour voir vos alertes
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Recommandations Peer-to-Peer ── -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-header">
+      <div class="card-title">💡 Recommandations Peer-to-Peer</div>
+      <div class="card-sub">Basées sur les pratiques des top performeurs de votre secteur</div>
+    </div>
+    <div id="bench-recommandations"
+      style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:4px 0">
+      <div style="grid-column:span 3;text-align:center;padding:30px;
+                  font-family:var(--mono);font-size:12px;color:var(--text-m)">
+        Cliquez sur "Analyser" pour voir vos recommandations
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Certificat ── -->
+  <div id="bench-certificat-section" style="display:none;margin-top:16px">
+    <div class="card" style="text-align:center;padding:30px;background:linear-gradient(135deg,#fffbea,#fff9e6);border:2px solid gold">
+      <div style="font-size:48px;margin-bottom:12px" id="cert-emoji">🥇</div>
+      <div style="font-size:22px;font-weight:700;color:#b8860b;margin-bottom:6px" id="cert-titre">—</div>
+      <div style="font-family:var(--mono);font-size:12px;color:#92400e;margin-bottom:16px" id="cert-details">—</div>
+      <div style="display:inline-block;background:#b8860b;color:#fff;padding:8px 20px;
+                  border-radius:var(--r);font-family:var(--mono);font-size:11px;letter-spacing:1px;margin-bottom:16px">
+        CERTIFIÉ PAR TWINOVA — DIGITAL MODEL INDUSTRIEL
+      </div>
+      <br>
+      <button type="button" class="btn-accent" onclick="benchmark.exporterCertificat()">
+        ⬇️ Télécharger le Certificat PDF
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL — SOUMETTRE MES DONNÉES
+     ══════════════════════════════════════════════════════════ -->
+<div id="bench-modal-soumettre"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
+         z-index:1000;align-items:center;justify-content:center;padding:20px"
+  onclick="if(event.target===this) benchmark.fermerModal()">
+  <div style="background:var(--bg-s);border:1px solid var(--border);border-radius:var(--rl);
+              width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;
+                padding:20px 24px;border-bottom:1px solid var(--border)">
+      <div style="font-size:17px;font-weight:700">📤 Soumettre mes données au pool</div>
+      <button type="button" onclick="benchmark.fermerModal()"
+        style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-m);padding:4px 8px">✕</button>
+    </div>
+
+    <div style="padding:24px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--teal);
+                  background:var(--teal-dim);border:1px solid var(--teal);
+                  border-radius:var(--r);padding:12px;margin-bottom:20px;line-height:1.6">
+        🔒 <strong>Anonymat garanti</strong> — Vos données sont soumises de façon anonyme.<br>
+        Aucune entreprise ne verra votre nom dans le classement.
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">TRS Moyen (%)</label>
+          <input type="number" id="sub-trs" placeholder="Ex: 65" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Qualité (%)</label>
+          <input type="number" id="sub-qualite" placeholder="Ex: 88" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Énergie (kWh/unité)</label>
+          <input type="number" id="sub-energie" placeholder="Ex: 0.21" step="0.01"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Rendement matière (%)</label>
+          <input type="number" id="sub-rendement" placeholder="Ex: 86" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+        <div style="grid-column:span 2">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-m)">Sécurité sanitaire (%)</label>
+          <input type="number" id="sub-securite" placeholder="Ex: 78" min="0" max="100"
+            style="width:100%;padding:10px;background:var(--bg-e);border:1px solid var(--border-b);
+                   border-radius:var(--r);font-family:var(--mono);font-size:14px;color:var(--text);margin-top:4px"/>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:20px">
+        <button type="button" class="btn-outline" onclick="benchmark.fermerModal()"
+          style="flex:1;padding:12px">Annuler</button>
+        <button type="button" id="bench-submit-confirm" class="btn-accent"
+          onclick="benchmark.confirmerSoumission()" style="flex:2;padding:12px">
+          Confirmer la soumission →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     STYLES CSS — À ajouter dans style.css
+     ══════════════════════════════════════════════════════════ -->
+<style>
+/* Rangs */
+.rang-top    { color: gold;           font-weight: 700; }
+.rang-bon    { color: var(--green);   font-weight: 700; }
+.rang-moyen  { color: var(--yellow);  font-weight: 600; }
+.rang-faible { color: var(--text-m);  font-weight: 400; }
+
+/* Barre quartile */
+.quartile-bar-container {
+  position: relative; height: 16px;
+  background: var(--bg-h); border-radius: 8px;
+  overflow: visible; margin: 4px 0;
+}
+.quartile-zone {
+  position: absolute; height: 100%; border-radius: 8px;
+}
+.quartile-marker {
+  position: absolute; top: -4px;
+  width: 10px; height: 24px;
+  border-radius: 5px; transform: translateX(-50%);
+  z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.quartile-label {
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--text-d); margin-top: 3px;
+}
+</style>
